@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { motion, MotionConfig } from "motion/react";
+import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { ApiError, type RegisterInput } from "../../lib/authApi";
 import { RateLimitError } from "../../lib/apiClient";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
@@ -84,12 +84,18 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
           </motion.p>
         )}
 
-        <motion.div variants={feedItemVariants} className="mb-6 flex border border-rule">
+        <motion.div variants={feedItemVariants} className="relative mb-6 flex border border-rule">
+          <motion.div
+            aria-hidden="true"
+            className="absolute inset-y-0 w-1/2 bg-ink"
+            animate={{ left: mode === "signin" ? "0%" : "50%" }}
+            transition={{ type: "spring", stiffness: 420, damping: 38 }}
+          />
           <button
             type="button"
             onClick={() => setMode("signin")}
-            className={`min-h-11 flex-1 text-xs font-semibold tracking-[0.1em] transition-colors ${
-              mode === "signin" ? "bg-ink text-paper" : "text-ink-dim hover:text-ink"
+            className={`relative z-10 min-h-11 flex-1 text-xs font-semibold tracking-[0.1em] transition-colors ${
+              mode === "signin" ? "text-paper" : "text-ink-dim hover:text-ink"
             }`}
           >
             SIGN IN
@@ -97,37 +103,53 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
           <button
             type="button"
             onClick={() => setMode("register")}
-            className={`min-h-11 flex-1 border-l border-rule text-xs font-semibold tracking-[0.1em] transition-colors ${
-              mode === "register" ? "bg-ink text-paper" : "text-ink-dim hover:text-ink"
+            className={`relative z-10 min-h-11 flex-1 border-l border-rule text-xs font-semibold tracking-[0.1em] transition-colors ${
+              mode === "register" ? "text-paper" : "text-ink-dim hover:text-ink"
             }`}
           >
             REGISTER
           </button>
         </motion.div>
 
-        <motion.form variants={feedItemVariants} onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {mode === "register" && (
-            <div className="flex gap-3">
-              <TextField
-                label="First name"
-                name="firstName"
-                autoComplete="given-name"
-                required
-                containerClassName="flex-1"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-              <TextField
-                label="Last name"
-                name="lastName"
-                autoComplete="family-name"
-                required
-                containerClassName="flex-1"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-          )}
+        <motion.form
+          layout
+          variants={feedItemVariants}
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
+          <AnimatePresence initial={false}>
+            {mode === "register" && (
+              <motion.div
+                key="name-fields"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className="flex gap-3">
+                  <TextField
+                    label="First name"
+                    name="firstName"
+                    autoComplete="given-name"
+                    required
+                    containerClassName="flex-1"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                  <TextField
+                    label="Last name"
+                    name="lastName"
+                    autoComplete="family-name"
+                    required
+                    containerClassName="flex-1"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <TextField
             label="Email"
@@ -149,14 +171,25 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {mode === "register" && (
-            <>
-              <p className="text-xs text-ink-dim">Must be at least 12 characters.</p>
-              <p className="text-xs text-ink-dim">
-                New accounts start as VIEWER (read-only). An admin can grant write access afterward.
-              </p>
-            </>
-          )}
+          <AnimatePresence initial={false}>
+            {mode === "register" && (
+              <motion.div
+                key="register-hints"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className="flex flex-col gap-4">
+                  <p className="text-xs text-ink-dim">Must be at least 12 characters.</p>
+                  <p className="text-xs text-ink-dim">
+                    New accounts start as VIEWER (read-only). An admin can grant write access afterward.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {error && (
             <p className="border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">

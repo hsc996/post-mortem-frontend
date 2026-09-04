@@ -5,9 +5,11 @@ import type { CurrentUser } from "../../types/user";
 interface WireHeaderProps {
   currentUser: CurrentUser;
   onSignOut: () => void;
+  isAdmin: boolean;
+  onManageUsers: () => void;
 }
 
-export function WireHeader({ currentUser, onSignOut }: WireHeaderProps) {
+export function WireHeader({ currentUser, onSignOut, isAdmin, onManageUsers }: WireHeaderProps) {
   const now = useClock();
 
   return (
@@ -27,6 +29,15 @@ export function WireHeader({ currentUser, onSignOut }: WireHeaderProps) {
             <span className="text-xs font-semibold tracking-[0.06em] text-ink-dim">
               {currentUser.name} · {currentUser.role.toUpperCase()}
             </span>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={onManageUsers}
+                className="inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.1em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
+              >
+                MANAGE USERS
+              </button>
+            )}
             <button
               type="button"
               onClick={onSignOut}

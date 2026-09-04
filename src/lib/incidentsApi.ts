@@ -94,6 +94,38 @@ export async function listUsers(token: string): Promise<UserDto[]> {
   return handle<UserDto[]>(await authFetch(token, "/auth/users?limit=200"));
 }
 
+export interface IncidentCreateInput {
+  title: string;
+  description: string;
+  serviceName: string;
+  severity: Severity;
+}
+
+export async function createIncident(token: string, input: IncidentCreateInput): Promise<IncidentDto> {
+  return handle<IncidentDto>(
+    await authFetch(token, "/incidents/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: input.title,
+        description: input.description,
+        service_name: input.serviceName,
+        severity: input.severity,
+      }),
+    }),
+  );
+}
+
+export async function updateUserRole(token: string, userId: string, role: string): Promise<UserDto> {
+  return handle<UserDto>(
+    await authFetch(token, `/auth/users/${userId}/role`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    }),
+  );
+}
+
 export async function getMitigation(token: string, incidentId: string): Promise<MitigationDto | null> {
   const response = await authFetch(token, `/incidents/${incidentId}/mitigation/`);
   if (response.status === 404) return null;

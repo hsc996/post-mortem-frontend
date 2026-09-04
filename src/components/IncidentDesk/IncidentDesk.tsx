@@ -11,6 +11,8 @@ import { IncidentFeed } from "./IncidentFeed";
 import { LoadingState, type SkeletonSpec } from "./LoadingState";
 import { ErrorState } from "./ErrorState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
+import { NewIncidentPanel } from "./NewIncidentPanel";
+import { AdminUsersScreen } from "../Admin/AdminUsersScreen";
 
 const LOADING_SKELETON_SPECS: SkeletonSpec[] = [
   { hasMitigation: false, actionRowKind: "button" },
@@ -53,10 +55,22 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
 export function IncidentDesk({ currentUser: authUser, token, onSignOut }: IncidentDeskProps) {
   const now = useClock();
   const currentUser = toCurrentUser(authUser);
-  const { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind, refreshIncident } =
-    useIncidents(token);
+  const {
+    incidents,
+    loadError,
+    retry,
+    auditTrail,
+    loadAuditTrail,
+    claim,
+    resolve,
+    unwind,
+    refreshIncident,
+    createIncident,
+  } = useIncidents(token);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [newIncidentOpen, setNewIncidentOpen] = useState(false);
+  const [view, setView] = useState<"desk" | "admin">("desk");
   const openerRef = useRef<HTMLElement | null>(null);
 
   const sorted = useMemo(() => (incidents ? sortIncidents(incidents, now) : []), [incidents, now]);
@@ -76,6 +90,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
 
   const handleSelect = (id: string, opener: HTMLElement) => {
     openerRef.current = opener;
+    setNewIncidentOpen(false);
     setSelectedIncidentId(id);
     setPanelOpen(true);
     void loadAuditTrail(id);
@@ -86,14 +101,33 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
     openerRef.current?.focus();
   };
 
+  const handleOpenNewIncident = () => {
+    setPanelOpen(false);
+    setNewIncidentOpen(true);
+  };
+
   const selectedIncident = selectedIncidentId ? findLive(selectedIncidentId) : undefined;
 
   const acting = canMutate(currentUser.role);
+  const isAdmin = currentUser.role === "admin";
+
+  if (view === "admin" && isAdmin) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <AdminUsersScreen token={token} currentUserId={authUser.id} onBack={() => setView("desk")} />
+      </MotionConfig>
+    );
+  }
 
   return (
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-paper">
-      <WireHeader currentUser={currentUser} onSignOut={onSignOut} />
+      <WireHeader
+        currentUser={currentUser}
+        onSignOut={onSignOut}
+        isAdmin={isAdmin}
+        onManageUsers={() => setView("admin")}
+      />
 
       {selectedIncidentId && selectedIncident && (
         <IncidentDetailPanel
@@ -110,8 +144,14 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
         />
       )}
 
+      {acting && (
+        <NewIncidentPanel isOpen={newIncidentOpen} onClose={() => setNewIncidentOpen(false)} onCreate={createIncident} />
+      )}
+
       <main
-        className={`transition-[padding] duration-300 ${panelOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""}`}
+        className={`transition-[padding] duration-300 ${
+          panelOpen || newIncidentOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""
+        }`}
       >
         {incidents === null ? (
           loadError ? (
@@ -120,7 +160,20 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
             <LoadingState specs={LOADING_SKELETON_SPECS} />
           )
         ) : (
-          <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />
+          <>
+            {acting && (
+              <div className="mx-auto flex max-w-4xl justify-end px-5 pt-4 sm:px-8">
+                <button
+                  type="button"
+                  onClick={handleOpenNewIncident}
+                  className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+                >
+                  + FILE INCIDENT
+                </button>
+              </div>
+            )}
+            <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />
+          </>
         )}
       </main>
     </div>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuditEntry, Incident } from "../types/incident";
-import type { PanelActionResult } from "../types/panelAction";
+import type { CreateIncidentResult, PanelActionResult } from "../types/panelAction";
 import * as api from "../lib/incidentsApi";
 import { ConflictError } from "../lib/incidentsApi";
 import { buildUserMap, mapAuditEntry, mapIncident, mapMitigation, type UserMap } from "../lib/incidentMapper";
@@ -126,6 +126,20 @@ export function useIncidents(token: string) {
     [token, patchIncident],
   );
 
+  const createIncident = useCallback(
+    async (input: api.IncidentCreateInput): Promise<CreateIncidentResult> => {
+      try {
+        const dto = await api.createIncident(token, input);
+        const created = mapIncident(dto, userMapRef.current, null);
+        setIncidents((current) => (current ? [created, ...current] : [created]));
+        return { ok: true, incident: created };
+      } catch (err) {
+        return { ok: false, reason: err instanceof Error ? err.message : "Request failed." };
+      }
+    },
+    [token],
+  );
+
   const unwind = useCallback(
     async (id: string): Promise<PanelActionResult> => {
       try {
@@ -142,5 +156,16 @@ export function useIncidents(token: string) {
     [token, patchIncident, loadAuditTrail],
   );
 
-  return { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind, refreshIncident };
+  return {
+    incidents,
+    loadError,
+    retry,
+    auditTrail,
+    loadAuditTrail,
+    claim,
+    resolve,
+    unwind,
+    refreshIncident,
+    createIncident,
+  };
 }

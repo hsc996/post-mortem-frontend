@@ -1,6 +1,7 @@
 import type { Incident } from "../../types/incident";
 import { ClaimControl } from "./ClaimControl";
 import { UnwindControl } from "./UnwindControl";
+import { KeyHint } from "./KeyHint";
 
 interface PanelActionRowProps {
   incident: Incident;
@@ -40,7 +41,7 @@ export function PanelActionRow({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <ClaimControl assigneeName={incident.assigneeName} onClaim={onClaim} />
+        <ClaimControl assigneeName={incident.assigneeName} onClaim={onClaim} shortcutHint="C" />
         {incident.mitigation && <UnwindControl onUnwind={onUnwind} />}
         <button
           type="button"
@@ -48,6 +49,7 @@ export function PanelActionRow({
           className="ml-auto inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
         >
           RESOLVE
+          <KeyHint char="R" />
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
 import { useClock } from "../../hooks/useClock";
@@ -54,33 +54,27 @@ export function IncidentDetailPanel({
     if (isOpen) closeButtonRef.current?.focus();
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const dispatch = (action: (id: string, version: number) => PanelActionResult, successText: string) => {
-    const result = action(snapshot.id, snapshot.version);
-    if (!result.ok) {
-      setSuccessMessage(null);
-      if (result.kind === "conflict") {
-        setConflict({ expected: result.expected, current: result.current });
-        setBlockedReason(null);
-      } else {
-        setBlockedReason(result.reason);
-        setConflict(null);
+  const dispatch = useCallback(
+    (action: (id: string, version: number) => PanelActionResult, successText: string) => {
+      const result = action(snapshot.id, snapshot.version);
+      if (!result.ok) {
+        setSuccessMessage(null);
+        if (result.kind === "conflict") {
+          setConflict({ expected: result.expected, current: result.current });
+          setBlockedReason(null);
+        } else {
+          setBlockedReason(result.reason);
+          setConflict(null);
+        }
+        return;
       }
-      return;
-    }
-    setSnapshot(result.incident);
-    setConflict(null);
-    setBlockedReason(null);
-    setSuccessMessage(successText);
-  };
+      setSnapshot(result.incident);
+      setConflict(null);
+      setBlockedReason(null);
+      setSuccessMessage(successText);
+    },
+    [snapshot],
+  );
 
   const handleReload = () => {
     if (!liveIncident) return;
@@ -89,6 +83,31 @@ export function IncidentDetailPanel({
     setBlockedReason(null);
     setSuccessMessage(null);
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const isResolved = snapshot.status === "resolved";
+      const key = e.key.toLowerCase();
+      if (key === "c" && canAct && !isResolved && !snapshot.assigneeName) {
+        e.preventDefault();
+        dispatch(onClaim, "Claimed.");
+      } else if (key === "r" && canAct && !isResolved) {
+        e.preventDefault();
+        dispatch(onResolve, "Resolved.");
+      } else if (key === "u" && canAct && !isResolved && snapshot.mitigation) {
+        e.preventDefault();
+        dispatch(onUnwind, "Mitigation cleared.");
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind]);
 
   return (
     <aside

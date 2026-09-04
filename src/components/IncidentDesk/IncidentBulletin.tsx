@@ -9,11 +9,12 @@ import { ClaimControl } from "./ClaimControl";
 interface IncidentBulletinProps {
   incident: Incident;
   now: Date;
+  canAct: boolean;
   onClaim: (id: string) => void;
   onSelect: (id: string, opener: HTMLElement) => void;
 }
 
-export function IncidentBulletin({ incident, now, onClaim, onSelect }: IncidentBulletinProps) {
+export function IncidentBulletin({ incident, now, canAct, onClaim, onSelect }: IncidentBulletinProps) {
   const isResolved = incident.status === "resolved";
 
   const handleSelect = (e: MouseEvent<HTMLElement>) => onSelect(incident.id, e.currentTarget);
@@ -58,7 +59,7 @@ export function IncidentBulletin({ incident, now, onClaim, onSelect }: IncidentB
 
         {incident.mitigation && <MitigationReadout mitigation={incident.mitigation} now={now} />}
 
-        {!isResolved && (
+        {!isResolved && (canAct || incident.assigneeName) && (
           <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
             <ClaimControl assigneeName={incident.assigneeName} onClaim={() => onClaim(incident.id)} />
           </div>

@@ -13,6 +13,7 @@ interface IncidentDetailPanelProps {
   initialIncident: Incident;
   liveIncident: Incident | undefined;
   auditTrail: AuditEntry[];
+  canAct: boolean;
   isOpen: boolean;
   onClose: () => void;
   onClaim: (id: string, expectedVersion: number) => PanelActionResult;
@@ -31,6 +32,7 @@ export function IncidentDetailPanel({
   initialIncident,
   liveIncident,
   auditTrail,
+  canAct,
   isOpen,
   onClose,
   onClaim,
@@ -130,6 +132,7 @@ export function IncidentDetailPanel({
           ) : (
             <PanelActionRow
               incident={snapshot}
+              canAct={canAct}
               onClaim={() => dispatch(onClaim, "Claimed.")}
               onResolve={() => dispatch(onResolve, "Resolved.")}
               onUnwind={() => dispatch(onUnwind, "Mitigation cleared.")}

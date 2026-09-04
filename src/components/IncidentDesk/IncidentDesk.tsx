@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AuditEntry, Incident, Severity } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
+import type { CurrentUser, Role } from "../../types/user";
+import { canMutate } from "../../types/user";
 import { mockIncidents } from "../../data/mockIncidents";
 import { buildAllAuditTrails } from "../../data/mockAuditTrail";
 import { useClock } from "../../hooks/useClock";
@@ -12,7 +14,8 @@ import { LoadingState } from "./LoadingState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const CURRENT_USER = "H. SCAIFE";
+const ROLE_CYCLE: Role[] = ["responder", "admin", "viewer"];
+const PERMISSION_DENIED = "Operation not permitted for current user role.";
 
 function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   const tier = (incident: Incident) => {
@@ -41,7 +44,15 @@ export function IncidentDesk() {
   const [auditTrail, setAuditTrail] = useState<Record<string, AuditEntry[]>>({});
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser>({ name: "H. SCAIFE", role: "responder" });
   const openerRef = useRef<HTMLElement | null>(null);
+
+  const handleCycleRole = () => {
+    setCurrentUser((user) => {
+      const next = ROLE_CYCLE[(ROLE_CYCLE.indexOf(user.role) + 1) % ROLE_CYCLE.length];
+      return { ...user, role: next };
+    });
+  };
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -58,11 +69,12 @@ export function IncidentDesk() {
   };
 
   const handleClaim = (id: string) => {
+    if (!canMutate(currentUser.role)) return;
     setIncidents((current) =>
       current
         ? current.map((incident) =>
             incident.id === id
-              ? { ...incident, assigneeName: CURRENT_USER, version: incident.version + 1 }
+              ? { ...incident, assigneeName: currentUser.name, version: incident.version + 1 }
               : incident,
           )
         : current,
@@ -71,9 +83,9 @@ export function IncidentDesk() {
       id: createId("audit"),
       incidentId: id,
       action: "INCIDENT_UPDATED",
-      actorName: CURRENT_USER,
+      actorName: currentUser.name,
       occurredAt: new Date().toISOString(),
-      detail: `Claimed by ${CURRENT_USER}`,
+      detail: `Claimed by ${currentUser.name}`,
     });
   };
 
@@ -86,23 +98,25 @@ export function IncidentDesk() {
   };
 
   const handlePanelClaim = (id: string, expectedVersion: number): PanelActionResult => {
+    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
     const live = findLive(id);
     if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
     if (live.version !== expectedVersion) {
       return { ok: false, kind: "conflict", expected: expectedVersion, current: live.version };
     }
-    const updated: Incident = { ...live, assigneeName: CURRENT_USER, version: live.version + 1 };
+    const updated: Incident = { ...live, assigneeName: currentUser.name, version: live.version + 1 };
     return commitUpdate(updated, {
       id: createId("audit"),
       incidentId: id,
       action: "INCIDENT_UPDATED",
-      actorName: CURRENT_USER,
+      actorName: currentUser.name,
       occurredAt: new Date().toISOString(),
-      detail: `Claimed by ${CURRENT_USER}`,
+      detail: `Claimed by ${currentUser.name}`,
     });
   };
 
   const handlePanelUnwind = (id: string, expectedVersion: number): PanelActionResult => {
+    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
     const live = findLive(id);
     if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
     if (live.version !== expectedVersion) {
@@ -119,13 +133,14 @@ export function IncidentDesk() {
       id: createId("audit"),
       incidentId: id,
       action: "MITIGATION_DELETED",
-      actorName: CURRENT_USER,
+      actorName: currentUser.name,
       occurredAt: new Date().toISOString(),
       detail: clearedSummary ? `Cleared: ${clearedSummary}` : undefined,
     });
   };
 
   const handlePanelResolve = (id: string, expectedVersion: number): PanelActionResult => {
+    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
     const live = findLive(id);
     if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
     if (live.version !== expectedVersion) {
@@ -164,9 +179,11 @@ export function IncidentDesk() {
 
   const selectedIncident = selectedIncidentId ? findLive(selectedIncidentId) : undefined;
 
+  const acting = canMutate(currentUser.role);
+
   return (
     <div className="min-h-screen bg-paper">
-      <WireHeader />
+      <WireHeader currentUser={currentUser} onCycleRole={handleCycleRole} />
 
       {selectedIncidentId && selectedIncident && (
         <IncidentDetailPanel
@@ -174,6 +191,7 @@ export function IncidentDesk() {
           initialIncident={selectedIncident}
           liveIncident={findLive(selectedIncidentId)}
           auditTrail={auditTrail[selectedIncidentId] ?? []}
+          canAct={acting}
           isOpen={panelOpen}
           onClose={handleClosePanel}
           onClaim={handlePanelClaim}
@@ -188,7 +206,7 @@ export function IncidentDesk() {
         {incidents === null ? (
           <LoadingState />
         ) : (
-          <IncidentFeed incidents={sorted} now={now} onClaim={handleClaim} onSelect={handleSelect} />
+          <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />
         )}
       </main>
     </div>

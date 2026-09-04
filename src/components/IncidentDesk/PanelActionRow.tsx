@@ -4,6 +4,7 @@ import { UnwindControl } from "./UnwindControl";
 
 interface PanelActionRowProps {
   incident: Incident;
+  canAct: boolean;
   onClaim: () => void;
   onResolve: () => void;
   onUnwind: () => void;
@@ -12,11 +13,12 @@ interface PanelActionRowProps {
 }
 
 /**
- * One clearly separable block so a future read-only/viewer variant can
- * swap it wholesale without restructuring the panel around it.
+ * One clearly separable block so the read-only/viewer variant swaps
+ * wholesale without restructuring the panel around it.
  */
 export function PanelActionRow({
   incident,
+  canAct,
   onClaim,
   onResolve,
   onUnwind,
@@ -25,6 +27,14 @@ export function PanelActionRow({
 }: PanelActionRowProps) {
   if (incident.status === "resolved") {
     return <p className="text-xs text-ink-dim">Resolved — no further action needed.</p>;
+  }
+
+  if (!canAct) {
+    return (
+      <p className="border border-rule px-2.5 py-1.5 text-xs text-ink-dim">
+        VIEW ONLY — operation not permitted for current user role.
+      </p>
+    );
   }
 
   return (

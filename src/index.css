@@ -1,21 +1,21 @@
 @import "tailwindcss";
-@import "@fontsource/big-shoulders-display/700";
-@import "@fontsource/big-shoulders-display/800";
+@import "@fontsource/orbitron/700.css";
+@import "@fontsource/orbitron/800.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
 
 /*
-  The wire desk: day desk under office light (warm manila paper, black ink)
-  and night desk under a single desk lamp (gunmetal ground, amber ink) for
-  a 2am handover. Not an inversion of the same page — a different light
-  source on the same machine.
+  The wire desk: day desk under office light (warm manila paper, black ink,
+  unchanged) and night desk under a single terminal — a proper green-on-
+  black phosphor readout, not a warm lamp. Not an inversion of the same
+  page — a different machine register for the same mechanism.
 
-  Two signal-lamp colors, not one accent: nominal (green) reads "still
-  live, working as expected" — the pulse dot, an in-progress status.
-  Alarm (red) is reserved for what actually needs attention now — an
-  expired mitigation, a version conflict, a failed load. Never the same
-  color for "normal" and "urgent."
+  Three status colors, not two: OPEN (amber — needs action, nothing done
+  yet), MITIGATED (green — stable, actively monitored), RESOLVED (dim,
+  no hue — quiet, done). Alarm (red / muted red) is reserved strictly for
+  what actually needs attention now — an expired mitigation, a version
+  conflict, a failed load — and never doubles as a routine status color.
 */
 :root {
   --color-paper: #f2ead7;
@@ -27,7 +27,9 @@
   --color-steel-dim: #6b7176;
   --color-rule: #c9bb98;
   --color-nominal: #2f6b3a;
+  --color-amber: #7a5a10;
   --color-alarm: #a3271a;
+  --color-alarm-muted: #8a4a3a;
   --color-alarm-ink: #faf5e8;
 
   color-scheme: light;
@@ -35,16 +37,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: #17181a;
-    --color-paper-dim: #202225;
-    --color-paper-raised: #1e2023;
-    --color-ink: #e9dab5;
-    --color-ink-dim: #a3906a;
+    --color-paper: #0b0f0c;
+    --color-paper-dim: #12180f;
+    --color-paper-raised: #10150f;
+    --color-ink: #4ade80;
+    --color-ink-dim: #2f9e5c;
     --color-steel: #d7dade;
     --color-steel-dim: #8d9297;
-    --color-rule: #3a3d40;
-    --color-nominal: #43c463;
+    --color-rule: #1f3326;
+    --color-nominal: #39ff6a;
+    --color-amber: #e0b83d;
     --color-alarm: #ff4d3d;
+    --color-alarm-muted: #d66b5c;
     --color-alarm-ink: #17181a;
 
     color-scheme: dark;
@@ -53,7 +57,7 @@
 
 @theme inline {
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --font-display: "Orbitron", "Arial", sans-serif;
 
   --color-paper: var(--color-paper);
   --color-paper-dim: var(--color-paper-dim);
@@ -64,7 +68,9 @@
   --color-steel-dim: var(--color-steel-dim);
   --color-rule: var(--color-rule);
   --color-nominal: var(--color-nominal);
+  --color-amber: var(--color-amber);
   --color-alarm: var(--color-alarm);
+  --color-alarm-muted: var(--color-alarm-muted);
   --color-alarm-ink: var(--color-alarm-ink);
 }
 

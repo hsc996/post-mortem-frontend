@@ -48,7 +48,7 @@ export function IncidentBulletin({ incident, now, canAct, onClaim, onSelect }: I
           <StatusTag status={incident.status} />
         </div>
 
-        <h2 className="font-display text-base font-bold text-ink sm:text-lg">{incident.title}</h2>
+        <h2 className="font-title text-lg font-semibold text-ink sm:text-xl">{incident.title}</h2>
 
         <div className="text-xs text-ink-dim">
           REPORTED BY {incident.reporterName.toUpperCase()} · {formatElapsed(incident.createdAt, now)}

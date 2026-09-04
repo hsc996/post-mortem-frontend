@@ -1,21 +1,25 @@
 @import "tailwindcss";
 @import "@fontsource/orbitron/700.css";
 @import "@fontsource/orbitron/800.css";
+@import "@fontsource/chakra-petch/500.css";
+@import "@fontsource/chakra-petch/600.css";
+@import "@fontsource/chakra-petch/700.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
 
 /*
-  The wire desk: day desk under office light (warm manila paper, black ink,
-  unchanged) and night desk under a single terminal — a proper green-on-
-  black phosphor readout, not a warm lamp. Not an inversion of the same
-  page — a different machine register for the same mechanism.
+  The wire desk: day desk under office light (warm manila paper, black ink)
+  and night desk under a single desk lamp (gunmetal ground, amber ink) for
+  a 2am handover — two lighting conditions on one machine, not an inverted
+  theme. Green stays a reserved signal, not the ground.
 
-  Three status colors, not two: OPEN (amber — needs action, nothing done
-  yet), MITIGATED (green — stable, actively monitored), RESOLVED (dim,
-  no hue — quiet, done). Alarm (red / muted red) is reserved strictly for
-  what actually needs attention now — an expired mitigation, a version
-  conflict, a failed load — and never doubles as a routine status color.
+  Three status colors, not two, read like a traffic light without literally
+  taking red: OPEN (amber — needs action, nothing done yet), MITIGATED
+  (green — stable, actively monitored), RESOLVED (dim, no hue — quiet,
+  done). Alarm (red / muted red) is reserved strictly for what actually
+  needs attention now — an expired mitigation, a version conflict, a
+  failed load — and never doubles as a routine status color.
 */
 :root {
   --color-paper: #f2ead7;
@@ -37,15 +41,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: #0b0f0c;
-    --color-paper-dim: #12180f;
-    --color-paper-raised: #10150f;
-    --color-ink: #4ade80;
-    --color-ink-dim: #2f9e5c;
+    --color-paper: #17181a;
+    --color-paper-dim: #202225;
+    --color-paper-raised: #1e2023;
+    --color-ink: #e9dab5;
+    --color-ink-dim: #a3906a;
     --color-steel: #d7dade;
     --color-steel-dim: #8d9297;
-    --color-rule: #1f3326;
-    --color-nominal: #39ff6a;
+    --color-rule: #2e3a30;
+    --color-nominal: #43c463;
     --color-amber: #e0b83d;
     --color-alarm: #ff4d3d;
     --color-alarm-muted: #d66b5c;
@@ -58,6 +62,7 @@
 @theme inline {
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --font-display: "Orbitron", "Arial", sans-serif;
+  --font-title: "Chakra Petch", "Arial", sans-serif;
 
   --color-paper: var(--color-paper);
   --color-paper-dim: var(--color-paper-dim);

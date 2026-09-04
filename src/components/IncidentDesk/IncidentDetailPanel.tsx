@@ -139,7 +139,7 @@ export function IncidentDetailPanel({
         </div>
 
         <div className="flex flex-col gap-4 px-5 py-4">
-          <h2 id={titleId} className="font-display text-lg font-bold text-ink">
+          <h2 id={titleId} className="font-title text-xl font-semibold text-ink">
             {snapshot.title}
           </h2>
           <p className="text-sm text-ink-dim">{snapshot.description}</p>

@@ -105,6 +105,27 @@ export function useIncidents(token: string) {
     [token, patchIncident, loadAuditTrail],
   );
 
+  /**
+   * A real server re-fetch, not a read of local state — the local `incidents`
+   * cache only learns about changes this client itself made. Reloading after
+   * a conflict must see what another actor did, which local state can't show.
+   */
+  const refreshIncident = useCallback(
+    async (id: string): Promise<Incident | null> => {
+      try {
+        const dto = await api.getIncident(token, id);
+        const mitigationDto = dto.status === "mitigated" ? await api.getMitigation(token, id) : null;
+        const mitigation = mitigationDto ? mapMitigation(mitigationDto, userMapRef.current) : null;
+        const updated = mapIncident(dto, userMapRef.current, mitigation);
+        patchIncident(updated);
+        return updated;
+      } catch {
+        return null;
+      }
+    },
+    [token, patchIncident],
+  );
+
   const unwind = useCallback(
     async (id: string): Promise<PanelActionResult> => {
       try {
@@ -121,5 +142,5 @@ export function useIncidents(token: string) {
     [token, patchIncident, loadAuditTrail],
   );
 
-  return { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind };
+  return { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind, refreshIncident };
 }

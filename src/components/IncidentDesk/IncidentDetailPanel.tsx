@@ -13,7 +13,6 @@ import { AuditTrailFeed } from "./AuditTrailFeed";
 
 interface IncidentDetailPanelProps {
   initialIncident: Incident;
-  liveIncident: Incident | undefined;
   auditTrail: AuditEntry[];
   canAct: boolean;
   isOpen: boolean;
@@ -21,6 +20,7 @@ interface IncidentDetailPanelProps {
   onClaim: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onResolve: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onUnwind: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
+  onReload: (id: string) => Promise<Incident | null>;
 }
 
 /**
@@ -32,7 +32,6 @@ interface IncidentDetailPanelProps {
  */
 export function IncidentDetailPanel({
   initialIncident,
-  liveIncident,
   auditTrail,
   canAct,
   isOpen,
@@ -40,6 +39,7 @@ export function IncidentDetailPanel({
   onClaim,
   onResolve,
   onUnwind,
+  onReload,
 }: IncidentDetailPanelProps) {
   const now = useClock();
   const titleId = useId();
@@ -81,9 +81,14 @@ export function IncidentDetailPanel({
     [snapshot],
   );
 
-  const handleReload = () => {
-    if (!liveIncident) return;
-    setSnapshot(liveIncident);
+  const [reloading, setReloading] = useState(false);
+
+  const handleReload = async () => {
+    setReloading(true);
+    const fresh = await onReload(snapshot.id);
+    setReloading(false);
+    if (!fresh) return;
+    setSnapshot(fresh);
     setConflict(null);
     setBlockedReason(null);
     setSuccessMessage(null);
@@ -161,7 +166,12 @@ export function IncidentDetailPanel({
           {snapshot.mitigation && <MitigationReadout mitigation={snapshot.mitigation} now={now} />}
 
           {conflict ? (
-            <ConflictNotice expected={conflict.expected} current={conflict.current} onReload={handleReload} />
+            <ConflictNotice
+              expected={conflict.expected}
+              current={conflict.current}
+              onReload={() => void handleReload()}
+              reloading={reloading}
+            />
           ) : (
             <PanelActionRow
               incident={snapshot}

@@ -53,7 +53,8 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
 export function IncidentDesk({ currentUser: authUser, token, onSignOut }: IncidentDeskProps) {
   const now = useClock();
   const currentUser = toCurrentUser(authUser);
-  const { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind } = useIncidents(token);
+  const { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind, refreshIncident } =
+    useIncidents(token);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -98,7 +99,6 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
         <IncidentDetailPanel
           key={selectedIncidentId}
           initialIncident={selectedIncident}
-          liveIncident={findLive(selectedIncidentId)}
           auditTrail={auditTrail[selectedIncidentId] ?? []}
           canAct={acting}
           isOpen={panelOpen}
@@ -106,6 +106,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           onClaim={handlePanelClaim}
           onResolve={handlePanelResolve}
           onUnwind={handlePanelUnwind}
+          onReload={refreshIncident}
         />
       )}
 

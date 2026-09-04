@@ -3,15 +3,21 @@ import type { AuditEntry, Incident, Severity } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
 import type { CurrentUser, Role } from "../../types/user";
 import { canMutate } from "../../types/user";
-import { mockIncidents } from "../../data/mockIncidents";
+import { mockIncidents, fetchIncidents } from "../../data/mockIncidents";
 import { buildAllAuditTrails } from "../../data/mockAuditTrail";
 import { useClock } from "../../hooks/useClock";
 import { mitigationClock } from "../../lib/wireFormat";
 import { createId } from "../../lib/id";
 import { WireHeader } from "./WireHeader";
 import { IncidentFeed } from "./IncidentFeed";
-import { LoadingState } from "./LoadingState";
+import { LoadingState, type SkeletonSpec } from "./LoadingState";
+import { ErrorState } from "./ErrorState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
+
+const SKELETON_SPECS: SkeletonSpec[] = mockIncidents.map((incident) => ({
+  hasMitigation: !!incident.mitigation,
+  actionRowKind: incident.status === "resolved" ? "none" : incident.assigneeName ? "badge" : "button",
+}));
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 const ROLE_CYCLE: Role[] = ["responder", "admin", "viewer"];
@@ -41,6 +47,8 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
 export function IncidentDesk() {
   const now = useClock();
   const [incidents, setIncidents] = useState<Incident[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [auditTrail, setAuditTrail] = useState<Record<string, AuditEntry[]>>({});
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -55,12 +63,26 @@ export function IncidentDesk() {
   };
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      setIncidents(mockIncidents);
-      setAuditTrail(buildAllAuditTrails(mockIncidents));
-    }, 420);
-    return () => window.clearTimeout(id);
-  }, []);
+    let cancelled = false;
+    fetchIncidents()
+      .then((data) => {
+        if (cancelled) return;
+        setIncidents(data);
+        setAuditTrail(buildAllAuditTrails(data));
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setLoadError(err instanceof Error ? err.message : "Failed to load incidents.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadAttempt]);
+
+  const handleRetry = () => {
+    setLoadError(null);
+    setLoadAttempt((n) => n + 1);
+  };
 
   const sorted = useMemo(() => (incidents ? sortIncidents(incidents, now) : []), [incidents, now]);
 
@@ -204,7 +226,11 @@ export function IncidentDesk() {
         className={`transition-[padding] duration-300 ${panelOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""}`}
       >
         {incidents === null ? (
-          <LoadingState />
+          loadError ? (
+            <ErrorState message={loadError} onRetry={handleRetry} />
+          ) : (
+            <LoadingState specs={SKELETON_SPECS} />
+          )
         ) : (
           <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />
         )}

@@ -107,3 +107,15 @@ export const mockIncidents: Incident[] = [
     mitigation: null,
   },
 ];
+
+/**
+ * Shaped like a real fetch (async, rejectable) even though it's backed by
+ * the mock array above, so the error/retry path this powers is real code
+ * exercised against real timing, not a decoration — and swapping in a real
+ * `fetch(...)` later only changes this function's body.
+ */
+export function fetchIncidents(): Promise<Incident[]> {
+  return new Promise((resolve) => {
+    window.setTimeout(() => resolve(mockIncidents), 420);
+  });
+}

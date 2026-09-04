@@ -1,75 +1,100 @@
-# React + TypeScript + Vite
+# PostMortem
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An incident and shift handover monitoring/reporting app for high-consequence environments, providing incident tracking, temporary mitigation management, and shift handovers, backed by full audit logging and role-based access control.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Incident lifecycle management (create, update, resolve) with state tracking
+- Temporary mitigation tracking so fixes in progress aren't forgotten across shifts
+- Shift handover support backed by a per-incident audit trail
+- JWT-based authentication with role-based access control and token revocation
+- Rate limiting and configurable CORS
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Language/Runtime:** Python 3.12
+- **Framework:** FastAPI + Uvicorn
+- **Database:** PostgreSQL, accessed via SQLAlchemy (async) and asyncpg
+- **Migrations:** Alembic
+- **Auth:** PyJWT, bcrypt
+- **Rate limiting:** SlowAPI
+- **Validation/config:** Pydantic v2 / pydantic-settings
+- **Testing:** pytest, pytest-asyncio, httpx, aiosqlite
+- **Linting:** Ruff
+- **Containerization:** Docker / Docker Compose
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Python 3.12+
+- Docker & Docker Compose (recommended, no local PostgreSQL install needed), or a local PostgreSQL instance if running without Docker
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 1. Clone the repository
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+git clone <repository-url>
+cd post-mortem
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Configure environment variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy the example env file and fill in your own values:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
+```
 
+Required variables:
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Async Postgres connection string, e.g. `postgresql+asyncpg://user:password@localhost:5432/postmortem` |
+| `SECRET_KEY` | Secret used to sign JWTs (min. 32 characters, no placeholder values) |
+| `ALGORITHM` | JWT signing algorithm (defaults to `HS256`) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access token lifetime in minutes (defaults to 1440) |
+| `CORS_ORIGINS` | Comma-separated list of allowed CORS origins |
+
+### 3. Run with Docker Compose (recommended)
+
+```bash
+docker compose up --build
+```
+
+This starts a Postgres container, runs Alembic migrations, and launches the API at `http://localhost:8000`.
+
+### 4. Run locally without Docker
+
+Install dependencies (including dev/test extras):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+Apply database migrations:
+
+```bash
+alembic upgrade head
+```
+
+Start the API:
+
+```bash
+uvicorn src.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs`.
+
+### 5. Run tests
+
+```bash
+pytest
+```
+
+## Health Check
+
+```
+GET /healthz
 ```

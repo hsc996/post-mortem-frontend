@@ -28,7 +28,7 @@ export function IncidentFeed({ incidents, now, canAct, onClaim, onSelect }: Inci
         />
       ))}
       <div className="px-5 py-6 text-center sm:px-8">
-        <span className="font-wire text-xs tracking-[0.2em] text-ink-dim">— 30 —</span>
+        <span className="text-xs tracking-[0.2em] text-ink-dim">— 30 —</span>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
     <header className="sticky top-0 z-50 border-b-4 border-double border-steel bg-paper px-5 py-4 sm:px-8">
       <div className="mx-auto flex max-w-4xl items-end justify-between gap-4">
         <div>
-          <p className="font-wire text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          <p className="font-display text-3xl font-extrabold uppercase tracking-tight text-ink sm:text-4xl">
             POSTMORTEM
           </p>
           <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">
@@ -34,10 +34,10 @@ export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
 
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-nominal opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-nominal" />
             </span>
-            <span className="text-xs font-semibold tracking-[0.15em] text-accent">
+            <span className="text-xs font-semibold tracking-[0.15em] text-nominal">
               LIVE
             </span>
             <time

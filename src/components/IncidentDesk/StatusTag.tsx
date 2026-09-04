@@ -13,13 +13,13 @@ export function StatusTag({ status }: { status: Status }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-xs font-semibold tracking-[0.1em] ${
-        isLive ? "text-accent" : "text-ink-dim"
+        isLive ? "text-nominal" : "text-ink-dim"
       }`}
     >
       {isLive && (
         <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-nominal opacity-60" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-nominal" />
         </span>
       )}
       {LABEL[status]}

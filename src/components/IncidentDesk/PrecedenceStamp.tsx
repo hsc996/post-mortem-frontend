@@ -13,7 +13,7 @@ const SCALE: Record<Severity, string> = {
  */
 export function PrecedenceStamp({ severity }: { severity: Severity }) {
   return (
-    <span className={`font-wire shrink-0 ${SCALE[severity]}`}>
+    <span className={`shrink-0 ${SCALE[severity]}`}>
       {PRECEDENCE[severity]}
     </span>
   );

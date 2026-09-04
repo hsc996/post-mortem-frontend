@@ -48,7 +48,7 @@ export function AuditTrailFeed({ entries }: AuditTrailFeedProps) {
         <li key={entry.id} className="border-b border-rule py-2 last:border-b-0">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="text-xs tabular-nums text-ink-dim">{formatWireDate(entry.occurredAt)}</span>
-            <span className="font-wire text-xs font-bold tracking-[0.04em] text-ink">
+            <span className="text-xs font-bold tracking-[0.04em] text-ink">
               {ACTION_LABEL[entry.action]}
             </span>
             <span className="text-xs text-ink-dim">{entry.actorName}</span>

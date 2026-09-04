@@ -10,8 +10,8 @@ export function MitigationReadout({ mitigation, now }: { mitigation: Mitigation;
 
   if (clock.isExpired) {
     return (
-      <div className="flex items-center gap-2 border border-accent bg-accent px-2.5 py-1.5">
-        <span className="text-xs font-bold tracking-[0.08em] text-accent-ink">
+      <div className="flex items-center gap-2 border border-alarm bg-alarm px-2.5 py-1.5">
+        <span className="text-xs font-bold tracking-[0.08em] text-alarm-ink">
           MITIGATION EXPIRED {clock.display} AGO — UNWIND REQUIRED
         </span>
       </div>
@@ -21,7 +21,7 @@ export function MitigationReadout({ mitigation, now }: { mitigation: Mitigation;
   return (
     <div className="flex items-center gap-2 border border-rule px-2.5 py-1.5">
       <span className="text-xs text-ink-dim">{mitigation.summary}</span>
-      <span className="ml-auto shrink-0 font-wire text-xs font-semibold tabular-nums text-ink">
+      <span className="ml-auto shrink-0 text-xs font-semibold tabular-nums text-ink">
         EXPIRES {clock.display}
       </span>
     </div>

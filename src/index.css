@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "@fontsource/courier-prime/400.css";
-@import "@fontsource/courier-prime/700.css";
+@import "@fontsource/big-shoulders-display/700";
+@import "@fontsource/big-shoulders-display/800";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
@@ -10,6 +10,12 @@
   and night desk under a single desk lamp (gunmetal ground, amber ink) for
   a 2am handover. Not an inversion of the same page — a different light
   source on the same machine.
+
+  Two signal-lamp colors, not one accent: nominal (green) reads "still
+  live, working as expected" — the pulse dot, an in-progress status.
+  Alarm (red) is reserved for what actually needs attention now — an
+  expired mitigation, a version conflict, a failed load. Never the same
+  color for "normal" and "urgent."
 */
 :root {
   --color-paper: #f2ead7;
@@ -20,9 +26,9 @@
   --color-steel: #2c3134;
   --color-steel-dim: #6b7176;
   --color-rule: #c9bb98;
-  --color-accent: #b93318;
-  --color-accent-ink: #faf5e8;
-  --color-accent-dim: #8c6a4a;
+  --color-nominal: #2f6b3a;
+  --color-alarm: #a3271a;
+  --color-alarm-ink: #faf5e8;
 
   color-scheme: light;
 }
@@ -37,9 +43,9 @@
     --color-steel: #d7dade;
     --color-steel-dim: #8d9297;
     --color-rule: #3a3d40;
-    --color-accent: #ff6136;
-    --color-accent-ink: #17181a;
-    --color-accent-dim: #a3653f;
+    --color-nominal: #43c463;
+    --color-alarm: #ff4d3d;
+    --color-alarm-ink: #17181a;
 
     color-scheme: dark;
   }
@@ -47,7 +53,7 @@
 
 @theme inline {
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --font-wire: "Courier Prime", "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
 
   --color-paper: var(--color-paper);
   --color-paper-dim: var(--color-paper-dim);
@@ -57,9 +63,9 @@
   --color-steel: var(--color-steel);
   --color-steel-dim: var(--color-steel-dim);
   --color-rule: var(--color-rule);
-  --color-accent: var(--color-accent);
-  --color-accent-ink: var(--color-accent-ink);
-  --color-accent-dim: var(--color-accent-dim);
+  --color-nominal: var(--color-nominal);
+  --color-alarm: var(--color-alarm);
+  --color-alarm-ink: var(--color-alarm-ink);
 }
 
 html {
@@ -75,8 +81,8 @@ body {
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
+  background: var(--color-nominal);
+  color: var(--color-paper);
 }
 
 * {
@@ -84,7 +90,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-nominal);
   outline-offset: 2px;
 }
 

@@ -13,7 +13,7 @@ interface ClaimControlProps {
 export function ClaimControl({ assigneeName, onClaim, shortcutHint }: ClaimControlProps) {
   if (assigneeName) {
     return (
-      <span className="inline-flex items-center border border-rule px-2 py-1 font-wire text-xs tracking-[0.04em] text-ink-dim">
+      <span className="inline-flex items-center border border-rule px-2 py-1 text-xs tracking-[0.04em] text-ink-dim">
         CLAIMED — {assigneeName.toUpperCase()}
       </span>
     );

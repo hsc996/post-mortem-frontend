@@ -18,12 +18,30 @@ export interface Mitigation {
 export interface Incident {
   id: string;
   title: string;
+  description: string;
   serviceName: string;
   severity: Severity;
   status: Status;
+  version: number;
   reporterName: string;
   assigneeName: string | null;
   createdAt: string;
   resolvedAt: string | null;
   mitigation: Mitigation | null;
+}
+
+export type AuditAction =
+  | "INCIDENT_CREATED"
+  | "INCIDENT_UPDATED"
+  | "INCIDENT_RESOLVED"
+  | "MITIGATION_CREATED"
+  | "MITIGATION_DELETED";
+
+export interface AuditEntry {
+  id: string;
+  incidentId: string;
+  action: AuditAction;
+  actorName: string;
+  occurredAt: string;
+  detail?: string;
 }

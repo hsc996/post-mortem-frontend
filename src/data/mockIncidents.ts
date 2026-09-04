@@ -1,0 +1,91 @@
+import type { Incident } from "../types/incident";
+
+// Synthetic demonstration data — no live backend is wired up yet. Shaped
+// to match the post-mortem API's actual schema so it drops in cleanly
+// once that wiring happens.
+const ago = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
+
+export const mockIncidents: Incident[] = [
+  {
+    id: "a1",
+    title: "Checkout failing for EU customers",
+    serviceName: "payments-api",
+    severity: "critical",
+    status: "open",
+    reporterName: "R. Okafor",
+    assigneeName: null,
+    createdAt: ago(6),
+    resolvedAt: null,
+    mitigation: null,
+  },
+  {
+    id: "a2",
+    title: "Elevated login latency after cert rotation",
+    serviceName: "auth-service",
+    severity: "high",
+    status: "mitigated",
+    reporterName: "T. Álvarez",
+    assigneeName: "T. Álvarez",
+    createdAt: ago(54),
+    resolvedAt: null,
+    mitigation: {
+      summary: "Pinned previous cert chain on edge nodes",
+      ttlMinutes: 90,
+      appliedAt: ago(31),
+      appliedByName: "T. Álvarez",
+    },
+  },
+  {
+    id: "a3",
+    title: "Search results stale across all regions",
+    serviceName: "search-index",
+    severity: "high",
+    status: "mitigated",
+    reporterName: "J. Meng",
+    assigneeName: "J. Meng",
+    createdAt: ago(210),
+    resolvedAt: null,
+    mitigation: {
+      summary: "Forced manual reindex, disabled incremental sync",
+      ttlMinutes: 60,
+      appliedAt: ago(96),
+      appliedByName: "J. Meng",
+    },
+  },
+  {
+    id: "a4",
+    title: "Invoice retries queuing beyond SLA",
+    serviceName: "billing-worker",
+    severity: "medium",
+    status: "open",
+    reporterName: "S. Kowalski",
+    assigneeName: "S. Kowalski",
+    createdAt: ago(22),
+    resolvedAt: null,
+    mitigation: null,
+  },
+  {
+    id: "a5",
+    title: "Delayed push notifications during deploy",
+    serviceName: "notification-service",
+    severity: "medium",
+    status: "resolved",
+    reporterName: "H. Scaife",
+    assigneeName: "H. Scaife",
+    createdAt: ago(640),
+    resolvedAt: ago(590),
+    mitigation: null,
+  },
+  {
+    id: "a6",
+    title: "Elevated 404 rate on legacy image paths",
+    serviceName: "static-assets-cdn",
+    severity: "low",
+    status: "resolved",
+    reporterName: "R. Okafor",
+    assigneeName: "R. Okafor",
+    createdAt: ago(1400),
+    resolvedAt: ago(1250),
+    mitigation: null,
+  },
+];

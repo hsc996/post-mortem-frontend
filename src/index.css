@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@import "@fontsource/courier-prime/400.css";
+@import "@fontsource/courier-prime/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
+
+/*
+  The wire desk: day desk under office light (warm manila paper, black ink)
+  and night desk under a single desk lamp (gunmetal ground, amber ink) for
+  a 2am handover. Not an inversion of the same page — a different light
+  source on the same machine.
+*/
+:root {
+  --color-paper: #f2ead7;
+  --color-paper-dim: #e7dcc2;
+  --color-paper-raised: #faf5e8;
+  --color-ink: #211d14;
+  --color-ink-dim: #5c5340;
+  --color-steel: #2c3134;
+  --color-steel-dim: #6b7176;
+  --color-rule: #c9bb98;
+  --color-accent: #b93318;
+  --color-accent-ink: #faf5e8;
+  --color-accent-dim: #8c6a4a;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #17181a;
+    --color-paper-dim: #202225;
+    --color-paper-raised: #1e2023;
+    --color-ink: #e9dab5;
+    --color-ink-dim: #a3906a;
+    --color-steel: #d7dade;
+    --color-steel-dim: #8d9297;
+    --color-rule: #3a3d40;
+    --color-accent: #ff6136;
+    --color-accent-ink: #17181a;
+    --color-accent-dim: #a3653f;
+
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-wire: "Courier Prime", "JetBrains Mono", ui-monospace, monospace;
+
+  --color-paper: var(--color-paper);
+  --color-paper-dim: var(--color-paper-dim);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-dim: var(--color-ink-dim);
+  --color-steel: var(--color-steel);
+  --color-steel-dim: var(--color-steel-dim);
+  --color-rule: var(--color-rule);
+  --color-accent: var(--color-accent);
+  --color-accent-ink: var(--color-accent-ink);
+  --color-accent-dim: var(--color-accent-dim);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+* {
+  scrollbar-color: var(--color-steel-dim) var(--color-paper-dim);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

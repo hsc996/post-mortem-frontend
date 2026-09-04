@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-04T18:00:00Z",
+  "title": "Design System: PostMortem",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Wire Red",
+        "canonical": "oklch(48% 0.19 33) / oklch(68% 0.19 38)",
+        "tonalRamp": ["oklch(18% 0.10 33)", "oklch(28% 0.14 33)", "oklch(38% 0.17 33)", "oklch(48% 0.19 33)", "oklch(58% 0.19 35)", "oklch(68% 0.19 38)", "oklch(80% 0.14 40)", "oklch(92% 0.06 45)"]
+      },
+      "accent-ink": {
+        "role": "primary-on",
+        "displayName": "Wire Red Ink",
+        "canonical": "oklch(97% 0.01 85) / oklch(20% 0.01 250)"
+      },
+      "accent-dim": {
+        "role": "primary-muted",
+        "displayName": "Ember",
+        "canonical": "oklch(52% 0.07 45) / oklch(56% 0.09 40)",
+        "note": "Defined in tokens but not yet consumed by a shipped component; reserved for a future secondary-alert tier."
+      },
+      "paper": {
+        "role": "neutral-bg",
+        "displayName": "Manila Paper",
+        "canonical": "oklch(93% 0.02 85) / oklch(18% 0.005 250)",
+        "tonalRamp": ["oklch(15% 0.005 250)", "oklch(25% 0.01 85)", "oklch(38% 0.015 85)", "oklch(52% 0.02 85)", "oklch(68% 0.025 85)", "oklch(80% 0.025 85)", "oklch(88% 0.02 85)", "oklch(96% 0.015 85)"]
+      },
+      "paper-dim": {
+        "role": "neutral-bg-hover",
+        "displayName": "Aged Manila",
+        "canonical": "oklch(90% 0.025 85) / oklch(21% 0.005 250)"
+      },
+      "paper-raised": {
+        "role": "neutral-bg-raised",
+        "displayName": "Bright Manila",
+        "canonical": "oklch(97% 0.015 85) / oklch(20% 0.005 250)",
+        "note": "Not yet consumed by any shipped component."
+      },
+      "ink": {
+        "role": "neutral-text",
+        "displayName": "Wire Ink",
+        "canonical": "oklch(24% 0.015 75) / oklch(88% 0.06 85)",
+        "tonalRamp": ["oklch(15% 0.01 75)", "oklch(24% 0.015 75)", "oklch(34% 0.02 75)", "oklch(46% 0.03 80)", "oklch(60% 0.05 82)", "oklch(72% 0.06 84)", "oklch(82% 0.06 85)", "oklch(92% 0.04 85)"]
+      },
+      "ink-dim": {
+        "role": "neutral-text-secondary",
+        "displayName": "Faded Wire Ink",
+        "canonical": "oklch(43% 0.03 80) / oklch(66% 0.06 75)"
+      },
+      "steel": {
+        "role": "neutral-chrome",
+        "displayName": "Gunmetal",
+        "canonical": "oklch(29% 0.005 240) / oklch(87% 0.005 240)",
+        "tonalRamp": ["oklch(16% 0.005 240)", "oklch(29% 0.005 240)", "oklch(40% 0.005 240)", "oklch(52% 0.005 240)", "oklch(64% 0.005 240)", "oklch(74% 0.005 240)", "oklch(84% 0.005 240)", "oklch(93% 0.005 240)"],
+        "note": "Reserved for the masthead's double-rule border only."
+      },
+      "steel-dim": {
+        "role": "neutral-chrome-secondary",
+        "displayName": "Dim Gunmetal",
+        "canonical": "oklch(48% 0.005 240) / oklch(60% 0.005 240)",
+        "note": "Scrollbar chrome only."
+      },
+      "rule": {
+        "role": "neutral-border",
+        "displayName": "Manila Rule",
+        "canonical": "oklch(78% 0.03 85) / oklch(27% 0.005 240)"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display / Masthead", "purpose": "The \"POSTMORTEM\" nameplate. Appears once, in the header." },
+      "headline": { "displayName": "Headline", "purpose": "A bulletin's incident title. Deliberately not bold." },
+      "title": { "displayName": "Precedence Title", "purpose": "FLASH/URGENT/BULLETIN/ROUTINE — severity as typography, never color." },
+      "body": { "displayName": "Body", "purpose": "Meta lines: reporter, elapsed time, mitigation summary." },
+      "label": { "displayName": "Label", "purpose": "Short tracked-out uppercase micro-labels: subtitle, LIVE, status tags, claim button." }
+    },
+    "motion": [
+      { "name": "pulse-ping", "value": "ping 1.5s cubic-bezier(0,0,0.2,1) infinite", "purpose": "The live-status dot's expanding ring, signaling an active/unresolved incident or the header's LIVE indicator." },
+      { "name": "cursor-blink", "value": "blink 1s steps(1) infinite", "purpose": "The loading state's teletype cursor block, evoking a wire machine receiving copy." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Wire Header",
+      "kind": "nav",
+      "refersTo": "wire-header",
+      "description": "The single persistent masthead: nameplate, subtitle, and a live heartbeat cluster (pulsing dot + LIVE + real-time UTC wire clock).",
+      "html": "<header class=\"ds-wire-header\"><div class=\"ds-wire-header__brand\"><p class=\"ds-wire-header__nameplate\">POSTMORTEM</p><p class=\"ds-wire-header__subtitle\">INCIDENT WIRE</p></div><div class=\"ds-wire-header__live\"><span class=\"ds-pulse-dot\" aria-hidden=\"true\"><span class=\"ds-pulse-dot__ping\"></span><span class=\"ds-pulse-dot__core\"></span></span><span class=\"ds-wire-header__live-label\">LIVE</span><time class=\"ds-wire-header__clock\">15:53:05Z</time></div></header>",
+      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-wire-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 4px double var(--color-steel); font-family: 'JetBrains Mono', ui-monospace, monospace; } .ds-wire-header__nameplate { margin: 0; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; color: var(--color-ink); } .ds-wire-header__subtitle { margin: 2px 0 0; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--color-ink-dim); } .ds-wire-header__live { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; } .ds-wire-header__live-label { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; color: var(--color-accent); } .ds-wire-header__clock { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-pulse-dot { position: relative; display: inline-flex; height: 8px; width: 8px; } .ds-pulse-dot__ping { position: absolute; inset: 0; border-radius: 9999px; background: var(--color-accent); opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot__core { position: relative; height: 8px; width: 8px; border-radius: 9999px; background: var(--color-accent); }"
+    },
+    {
+      "name": "Precedence Stamp",
+      "kind": "custom",
+      "refersTo": "title",
+      "description": "Severity read through typography alone — weight, size, and tracking escalate from ROUTINE to FLASH. Never color.",
+      "html": "<span class=\"ds-precedence ds-precedence--flash\">FLASH</span>",
+      "css": ".ds-precedence { font-family: 'Courier Prime', 'JetBrains Mono', monospace; flex-shrink: 0; } .ds-precedence--flash { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--urgent { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--bulletin { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: var(--color-ink); } .ds-precedence--routine { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-ink-dim); }"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "refersTo": "status-tag-live",
+      "description": "The only place color signals urgency: live states pulse in Wire Red, resolved sits flat in Faded Wire Ink.",
+      "html": "<span class=\"ds-status-tag ds-status-tag--live\"><span class=\"ds-pulse-dot ds-pulse-dot--sm\" aria-hidden=\"true\"><span class=\"ds-pulse-dot__ping\"></span><span class=\"ds-pulse-dot__core\"></span></span>MITIGATED</span>",
+      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-status-tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; } .ds-status-tag--live { color: var(--color-accent); } .ds-status-tag--resolved { color: var(--color-ink-dim); } .ds-pulse-dot--sm { height: 6px; width: 6px; } .ds-pulse-dot--sm .ds-pulse-dot__ping, .ds-pulse-dot--sm .ds-pulse-dot__core { height: 6px; width: 6px; border-radius: 9999px; background: var(--color-accent); } .ds-pulse-dot--sm .ds-pulse-dot__ping { position: absolute; inset: 0; opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot--sm .ds-pulse-dot__core { position: relative; }"
+    },
+    {
+      "name": "Incident Bulletin",
+      "kind": "card",
+      "refersTo": "incident-bulletin",
+      "description": "The feed row itself: no card shell, just a hairline bottom border, full-bleed against the page. Hovers to a flat tint, never a shadow.",
+      "html": "<article class=\"ds-bulletin\"><div class=\"ds-bulletin__top\"><span class=\"ds-precedence ds-precedence--urgent\">URGENT</span><span class=\"ds-bulletin__meta\">14:58Z</span><span class=\"ds-bulletin__meta\">auth-service</span></div><h2 class=\"ds-bulletin__title\">Elevated login latency after cert rotation</h2><div class=\"ds-bulletin__meta\">REPORTED BY T. ÁLVAREZ · 54M AGO</div></article>",
+      "css": ".ds-bulletin { border-bottom: 1px solid var(--color-rule); padding: 16px 20px; transition: background-color 0.15s; font-family: 'JetBrains Mono', monospace; } .ds-bulletin:hover { background-color: color-mix(in srgb, var(--color-paper-dim) 60%, transparent); } .ds-bulletin__top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; } .ds-bulletin__meta { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-bulletin__title { margin: 4px 0 8px; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 16px; font-weight: 400; color: var(--color-ink); }"
+    },
+    {
+      "name": "Mitigation Readout — Active",
+      "kind": "custom",
+      "refersTo": "mitigation-readout",
+      "description": "A live TTL countdown, recomputed every second against the real clock — read-time truth, not a cached push.",
+      "html": "<div class=\"ds-mitigation\"><span class=\"ds-mitigation__summary\">Pinned previous cert chain on edge nodes</span><span class=\"ds-mitigation__expiry\">EXPIRES 58:51</span></div>",
+      "css": ".ds-mitigation { display: flex; align-items: center; gap: 8px; border: 1px solid var(--color-rule); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; } .ds-mitigation__summary { font-size: 12px; color: var(--color-ink-dim); } .ds-mitigation__expiry { margin-left: auto; flex-shrink: 0; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-ink); }"
+    },
+    {
+      "name": "Mitigation Readout — Expired",
+      "kind": "custom",
+      "refersTo": "mitigation-readout-expired",
+      "description": "The alarm state: a solid Wire Red fill, the one other place besides the live-status dot where the reserved accent is spent.",
+      "html": "<div class=\"ds-mitigation-expired\">MITIGATION EXPIRED 36:08 AGO — UNWIND REQUIRED</div>",
+      "css": ".ds-mitigation-expired { display: flex; align-items: center; border: 1px solid var(--color-accent); background: var(--color-accent); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-accent-ink); }"
+    },
+    {
+      "name": "Claim Control — Unclaimed",
+      "kind": "button",
+      "refersTo": "button-claim",
+      "description": "The primary action: outlined at rest, fully inverts fill/text on hover and focus alike.",
+      "html": "<button class=\"ds-claim-btn\" type=\"button\">CLAIM</button>",
+      "css": ".ds-claim-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--color-ink); background: transparent; color: var(--color-ink); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-claim-btn:hover, .ds-claim-btn:focus-visible { background: var(--color-ink); color: var(--color-paper); }"
+    },
+    {
+      "name": "Claim Control — Claimed",
+      "kind": "custom",
+      "refersTo": "button-claim",
+      "description": "Once claimed, the control becomes a static stamp, not a toggle — ownership as a permanent mark, matching the audit trail's append-only discipline.",
+      "html": "<span class=\"ds-claimed-stamp\">CLAIMED — H. SCAIFE</span>",
+      "css": ".ds-claimed-stamp { display: inline-flex; align-items: center; border: 1px solid var(--color-rule); padding: 4px 8px; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--color-ink-dim); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Incident Wire",
+    "overview": "PostMortem's dashboard is not a status-card grid — it's a continuous wire feed, the same discipline a newsroom telex applies to incoming copy: timestamped, precedence-graded, append-only, never silently edited. This is a deliberate refusal of the generic-SaaS dashboard default (colored status pills in a card grid); the system's own thesis is that the audit-trail discipline the product is built on — nothing is silently overwritten, every action punches a new line — deserves a visual form that behaves the same way. The page reads top-down like dispatch copy, most urgent and most recent first, not as a dashboard the eye has to hunt across.\n\nThe palette is near-monochrome by design: warm manila paper and dark ink by day, gunmetal ground and amber ink by night — the same machine under a different light source, not an inverted theme. A single hot accent, Wire Red, is spent almost nowhere, which is exactly why it reads instantly when it appears: the live/unresolved state, and the alarm when a mitigation's TTL has run out. Severity itself never touches color at all — FLASH/URGENT/BULLETIN/ROUTINE is a typographic ladder of weight and size, the wire service's own precedence vocabulary. Every surface is flat: no shadows, no rounded corners anywhere except the two functional live-pulse dots. Component feel is restrained and exacting — every stroke deliberate, nothing decorative, nothing added for warmth that isn't earned by function.",
+    "keyCharacteristics": [
+      "Continuous append-only feed, not a card grid — one bulletin per incident, dividers not gutters.",
+      "Near-monochrome manila/gunmetal palette with exactly one reserved hot accent.",
+      "Severity communicated by typography (weight, size, tracking), never by color.",
+      "Zero shadows, zero border-radius except the two functional pulse dots.",
+      "Day desk / night desk: light and dark are two lighting conditions on one machine, not an inversion."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Wire Red appears in exactly two places: the live/unresolved status indicator and the expired-mitigation alarm. It is never used for hover states, severity, or emphasis of any other kind — if everything can turn red, nothing does.", "section": "colors" },
+      { "name": "The Day Desk / Night Desk Rule", "body": "Light and dark mode are not an inverted palette — they're two lighting conditions on the same machine (prefers-color-scheme, not a manual toggle). Every neutral and the accent both get an explicit day value and an explicit night value; neither is derived by inverting the other.", "section": "colors" },
+      { "name": "The Precedence-By-Weight Rule", "body": "Severity is FLASH / URGENT / BULLETIN / ROUTINE — words, never a color chip — and each step down the ladder loses weight, size, and tracking in the same motion. A reader triages by glancing at type density alone.", "section": "typography" },
+      { "name": "The Flat Wire Rule", "body": "No shadow, ever. If something needs to feel more important, it gets a heavier border or the one reserved accent color — never a drop shadow pretending the screen has depth it doesn't.", "section": "elevation" },
+      { "name": "The Right-Angle Rule", "body": "Radius is reserved for exactly one thing: the circular pulse indicator that means \"this is live.\" Every other shape in the system is a hard rectangle.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reserve Wire Red exclusively for the live/unresolved status signal and the expired-mitigation alarm — nowhere else.",
+      "Do communicate severity through the Courier Prime weight/size/tracking ladder (FLASH → ROUTINE), never through a color chip.",
+      "Do give every color token an explicit day value and an explicit night value tied to prefers-color-scheme — never derive dark mode by inverting light mode.",
+      "Do keep every rectangular surface at 0 radius; the only permitted curve is the functional live-pulse dot.",
+      "Do set font-variant-numeric: tabular-nums on any live-updating numeral — clocks, countdowns, elapsed-time strings — so digits never jitter the layout.",
+      "Do keep interactive targets at a minimum 44px height, per the product's ICU-grade accessibility commitment."
+    ],
+    "donts": [
+      "Don't add a second accent hue, a gradient, or a tinted shadow — the palette's entire force comes from staying near-monochrome with one reserved color.",
+      "Don't add box-shadow or simulated elevation anywhere; depth is stroke weight and tint delta only.",
+      "Don't round a button, card, or divider; radius is spent entirely on the two pulse-dot indicators.",
+      "Don't use the wire typeface (Courier Prime) for dense body or meta copy — it's reserved for the masthead, bulletin headlines, precedence stamps, and short control labels; long-running text stays in JetBrains Mono.",
+      "Don't turn \"claimed\" into a toggle a responder can undo casually — claiming is a stamp, a one-way mark, matching the audit trail's append-only discipline."
+    ]
+  }
+}

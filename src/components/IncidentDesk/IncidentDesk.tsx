@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AuditEntry, Incident, Severity } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
-import type { CurrentUser, Role } from "../../types/user";
-import { canMutate } from "../../types/user";
+import type { AuthUser } from "../../types/user";
+import { canMutate, toCurrentUser } from "../../types/user";
 import { mockIncidents, fetchIncidents } from "../../data/mockIncidents";
 import { buildAllAuditTrails } from "../../data/mockAuditTrail";
 import { useClock } from "../../hooks/useClock";
@@ -20,8 +20,12 @@ const SKELETON_SPECS: SkeletonSpec[] = mockIncidents.map((incident) => ({
 }));
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const ROLE_CYCLE: Role[] = ["responder", "admin", "viewer"];
 const PERMISSION_DENIED = "Operation not permitted for current user role.";
+
+interface IncidentDeskProps {
+  currentUser: AuthUser;
+  onSignOut: () => void;
+}
 
 function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   const tier = (incident: Incident) => {
@@ -44,23 +48,16 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   });
 }
 
-export function IncidentDesk() {
+export function IncidentDesk({ currentUser: authUser, onSignOut }: IncidentDeskProps) {
   const now = useClock();
+  const currentUser = toCurrentUser(authUser);
   const [incidents, setIncidents] = useState<Incident[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [auditTrail, setAuditTrail] = useState<Record<string, AuditEntry[]>>({});
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<CurrentUser>({ name: "H. SCAIFE", role: "responder" });
   const openerRef = useRef<HTMLElement | null>(null);
-
-  const handleCycleRole = () => {
-    setCurrentUser((user) => {
-      const next = ROLE_CYCLE[(ROLE_CYCLE.indexOf(user.role) + 1) % ROLE_CYCLE.length];
-      return { ...user, role: next };
-    });
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -205,7 +202,7 @@ export function IncidentDesk() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <WireHeader currentUser={currentUser} onCycleRole={handleCycleRole} />
+      <WireHeader currentUser={currentUser} onSignOut={onSignOut} />
 
       {selectedIncidentId && selectedIncident && (
         <IncidentDetailPanel

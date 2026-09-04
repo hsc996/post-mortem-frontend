@@ -4,10 +4,10 @@ import type { CurrentUser } from "../../types/user";
 
 interface WireHeaderProps {
   currentUser: CurrentUser;
-  onCycleRole: () => void;
+  onSignOut: () => void;
 }
 
-export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
+export function WireHeader({ currentUser, onSignOut }: WireHeaderProps) {
   const now = useClock();
 
   return (
@@ -23,14 +23,18 @@ export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
         </div>
 
         <div className="flex flex-col items-end gap-1.5">
-          <button
-            type="button"
-            onClick={onCycleRole}
-            aria-label={`Viewing as ${currentUser.name}, role ${currentUser.role}. Click to switch role (demo control).`}
-            className="inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.06em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
-          >
-            {currentUser.name} · {currentUser.role.toUpperCase()}
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold tracking-[0.06em] text-ink-dim">
+              {currentUser.name} · {currentUser.role.toUpperCase()}
+            </span>
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.1em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
+            >
+              LOG OUT
+            </button>
+          </div>
 
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-2 w-2" aria-hidden="true">

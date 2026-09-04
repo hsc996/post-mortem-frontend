@@ -1,0 +1,130 @@
+import { useState, type FormEvent } from "react";
+import { ApiError, type RegisterInput } from "../../lib/authApi";
+import { TextField } from "./TextField";
+
+interface LoginScreenProps {
+  onSignIn: (email: string, password: string) => Promise<void>;
+  onSignUp: (input: RegisterInput) => Promise<void>;
+}
+
+type Mode = "signin" | "register";
+
+export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
+  const [mode, setMode] = useState<Mode>("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (mode === "signin") {
+        await onSignIn(email, password);
+      } else {
+        await onSignUp({ email, password, firstName, lastName });
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-paper px-5">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <p className="font-display text-xl font-extrabold uppercase tracking-wide text-ink sm:text-2xl">
+            POSTMORTEM
+          </p>
+          <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">INCIDENT WIRE</p>
+        </div>
+
+        <div className="mb-6 flex border border-rule">
+          <button
+            type="button"
+            onClick={() => setMode("signin")}
+            className={`min-h-11 flex-1 text-xs font-semibold tracking-[0.1em] transition-colors ${
+              mode === "signin" ? "bg-ink text-paper" : "text-ink-dim hover:text-ink"
+            }`}
+          >
+            SIGN IN
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("register")}
+            className={`min-h-11 flex-1 border-l border-rule text-xs font-semibold tracking-[0.1em] transition-colors ${
+              mode === "register" ? "bg-ink text-paper" : "text-ink-dim hover:text-ink"
+            }`}
+          >
+            REGISTER
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {mode === "register" && (
+            <div className="flex gap-3">
+              <TextField
+                label="First name"
+                name="firstName"
+                autoComplete="given-name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextField
+                label="Last name"
+                name="lastName"
+                autoComplete="family-name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          )}
+
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            required
+            minLength={mode === "register" ? 8 : undefined}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          {mode === "register" && (
+            <p className="text-xs text-ink-dim">
+              New accounts start as VIEWER (read-only). An admin can grant write access afterward.
+            </p>
+          )}
+
+          {error && <p className="border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="mt-2 inline-flex min-h-11 items-center justify-center border border-ink text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper disabled:opacity-50"
+          >
+            {busy ? (mode === "signin" ? "SIGNING IN…" : "CREATING ACCOUNT…") : mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

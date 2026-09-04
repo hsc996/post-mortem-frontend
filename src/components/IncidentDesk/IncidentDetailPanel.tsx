@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { motion } from "motion/react";
 import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
 import { useClock } from "../../hooks/useClock";
+import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
 import { PrecedenceStamp } from "./PrecedenceStamp";
 import { StatusTag } from "./StatusTag";
 import { MitigationReadout } from "./MitigationReadout";
@@ -118,8 +120,16 @@ export function IncidentDetailPanel({
         isOpen ? "translate-y-0 sm:translate-x-0" : "translate-y-full sm:translate-y-0 sm:translate-x-full"
       }`}
     >
-      <div className="flex h-full flex-col overflow-y-auto">
-        <div className="flex items-start justify-between gap-3 border-b border-rule px-5 py-4">
+      <motion.div
+        className="flex h-full flex-col overflow-y-auto"
+        initial="hidden"
+        animate="show"
+        variants={feedContainerVariants}
+      >
+        <motion.div
+          variants={feedItemVariants}
+          className="flex items-start justify-between gap-3 border-b border-rule px-5 py-4"
+        >
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <PrecedenceStamp severity={snapshot.severity} />
             <span className="text-xs text-ink-dim">{snapshot.serviceName}</span>
@@ -136,9 +146,9 @@ export function IncidentDetailPanel({
               CLOSE
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col gap-4 px-5 py-4">
+        <motion.div variants={feedItemVariants} className="flex flex-col gap-4 px-5 py-4">
           <h2 id={titleId} className="font-title text-xl font-semibold text-ink">
             {snapshot.title}
           </h2>
@@ -159,13 +169,13 @@ export function IncidentDetailPanel({
               successMessage={successMessage}
             />
           )}
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col gap-2 border-t border-rule px-5 py-4">
+        <motion.div variants={feedItemVariants} className="flex flex-col gap-2 border-t border-rule px-5 py-4">
           <h3 className="text-xs font-semibold tracking-[0.15em] text-ink-dim">AUDIT TRAIL</h3>
           <AuditTrailFeed entries={auditTrail} />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </aside>
   );
 }

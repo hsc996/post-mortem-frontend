@@ -1,6 +1,8 @@
 import type { KeyboardEvent, MouseEvent } from "react";
+import { motion } from "motion/react";
 import type { Incident } from "../../types/incident";
 import { formatElapsed, formatWireDate } from "../../lib/wireFormat";
+import { feedItemVariants } from "../../lib/motionVariants";
 import { PrecedenceStamp } from "./PrecedenceStamp";
 import { StatusTag } from "./StatusTag";
 import { MitigationReadout } from "./MitigationReadout";
@@ -26,7 +28,9 @@ export function IncidentBulletin({ incident, now, canAct, onClaim, onSelect }: I
   };
 
   return (
-    <article
+    <motion.article
+      layout="position"
+      variants={feedItemVariants}
       role="button"
       tabIndex={0}
       onClick={handleSelect}
@@ -65,6 +69,6 @@ export function IncidentBulletin({ incident, now, canAct, onClaim, onSelect }: I
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }

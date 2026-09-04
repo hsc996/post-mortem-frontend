@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { MotionConfig } from "motion/react";
 import type { AuditEntry, Incident, Severity } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
 import type { AuthUser } from "../../types/user";
@@ -201,6 +202,7 @@ export function IncidentDesk({ currentUser: authUser, onSignOut }: IncidentDeskP
   const acting = canMutate(currentUser.role);
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-paper">
       <WireHeader currentUser={currentUser} onSignOut={onSignOut} />
 
@@ -233,5 +235,6 @@ export function IncidentDesk({ currentUser: authUser, onSignOut }: IncidentDeskP
         )}
       </main>
     </div>
+    </MotionConfig>
   );
 }

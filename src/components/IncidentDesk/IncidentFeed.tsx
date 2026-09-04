@@ -1,4 +1,6 @@
+import { motion } from "motion/react";
 import type { Incident } from "../../types/incident";
+import { feedContainerVariants } from "../../lib/motionVariants";
 import { IncidentBulletin } from "./IncidentBulletin";
 import { EmptyState } from "./EmptyState";
 
@@ -16,7 +18,7 @@ export function IncidentFeed({ incidents, now, canAct, onClaim, onSelect }: Inci
   }
 
   return (
-    <div>
+    <motion.div initial="hidden" animate="show" variants={feedContainerVariants}>
       {incidents.map((incident) => (
         <IncidentBulletin
           key={incident.id}
@@ -30,6 +32,6 @@ export function IncidentFeed({ incidents, now, canAct, onClaim, onSelect }: Inci
       <div className="px-5 py-6 text-center sm:px-8">
         <span className="text-xs tracking-[0.2em] text-ink-dim">— 30 —</span>
       </div>
-    </div>
+    </motion.div>
   );
 }

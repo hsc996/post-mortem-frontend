@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AuthUser } from "../types/user";
 import * as authApi from "../lib/authApi";
+import { registerUnauthorizedHandler } from "../lib/apiClient";
 
 const TOKEN_KEY = "postmortem.token";
 
@@ -10,6 +11,22 @@ export function useAuth() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<Status>(() => (localStorage.getItem(TOKEN_KEY) ? "checking" : "unauthenticated"));
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  // Any 401 anywhere in the app — not just the initial session check —
+  // routes here, so a token that expires or gets revoked mid-session
+  // bounces back to the login screen instead of surfacing as a stuck
+  // "blocked" panel action or a generic feed load error.
+  useEffect(() => {
+    registerUnauthorizedHandler(() => {
+      localStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+      setUser(null);
+      setSessionExpired(true);
+      setStatus("unauthenticated");
+    });
+    return () => registerUnauthorizedHandler(null);
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -38,6 +55,7 @@ export function useAuth() {
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
     setUser(fetchedUser);
+    setSessionExpired(false);
     setStatus("authenticated");
   }, []);
 
@@ -54,8 +72,9 @@ export function useAuth() {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+    setSessionExpired(false);
     setStatus("unauthenticated");
   }, [token]);
 
-  return { status, user, token, signIn, signUp, signOut };
+  return { status, user, token, sessionExpired, signIn, signUp, signOut };
 }

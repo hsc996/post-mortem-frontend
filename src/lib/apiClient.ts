@@ -1,4 +1,4 @@
-export const API_BASE = "http://localhost:8000/api/v1";
+export const API_BASE = import.meta.env.VITE_API_URL;
 
 export class ApiError extends Error {
   status: number;
@@ -6,6 +6,28 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
   }
+}
+
+/** 429s carry a client-side countdown hint — the backend gives no Retry-After header, but every limiter here is "N per 1 minute". */
+export class RateLimitError extends ApiError {
+  retryAfterSeconds: number;
+  constructor(message: string, retryAfterSeconds: number) {
+    super(message, 429);
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
+const RATE_LIMIT_WINDOW_SECONDS = 60;
+
+/**
+ * Registered once by useAuth so any 401 anywhere in the app — not just the
+ * initial session check — signs the user out instead of surfacing as a
+ * confusing generic error on whatever action triggered it.
+ */
+let onUnauthorized: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
 }
 
 /** FastAPI errors are either a plain string detail or a list of pydantic validation errors. */
@@ -24,7 +46,13 @@ function extractDetail(body: unknown, fallback: string): string {
 
 export async function parseError(response: Response): Promise<never> {
   if (response.status === 429) {
-    throw new ApiError("Too many attempts. Wait a moment before trying again.", 429);
+    throw new RateLimitError(
+      `Too many attempts. Try again in about ${RATE_LIMIT_WINDOW_SECONDS} seconds.`,
+      RATE_LIMIT_WINDOW_SECONDS,
+    );
+  }
+  if (response.status === 401) {
+    onUnauthorized?.();
   }
   let body: unknown;
   try {

@@ -40,13 +40,14 @@ export interface AuditLogDto {
   created_at: string;
 }
 
+/** GET /auth/users returns this in full for admins; everyone else gets only id/first_name/last_name. */
 export interface UserDto {
   id: string;
-  email: string;
+  email?: string;
   first_name: string;
   last_name: string;
-  role: string;
-  is_active: boolean;
+  role?: string;
+  is_active?: boolean;
 }
 
 /** A 409 from apply_optimistic_update — carries the two version numbers the backend compared. */

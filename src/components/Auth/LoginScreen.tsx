@@ -1,15 +1,17 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ApiError, type RegisterInput } from "../../lib/authApi";
+import { RateLimitError } from "../../lib/apiClient";
 import { TextField } from "./TextField";
 
 interface LoginScreenProps {
   onSignIn: (email: string, password: string) => Promise<void>;
   onSignUp: (input: RegisterInput) => Promise<void>;
+  sessionExpired: boolean;
 }
 
 type Mode = "signin" | "register";
 
-export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
+export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenProps) {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +19,28 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
   const [lastName, setLastName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryIn, setRetryIn] = useState(0);
+  const retryIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (retryIntervalRef.current !== null) window.clearInterval(retryIntervalRef.current);
+    };
+  }, []);
+
+  const startRetryCountdown = (seconds: number) => {
+    setRetryIn(seconds);
+    if (retryIntervalRef.current !== null) window.clearInterval(retryIntervalRef.current);
+    retryIntervalRef.current = window.setInterval(() => {
+      setRetryIn((n) => {
+        if (n <= 1 && retryIntervalRef.current !== null) {
+          window.clearInterval(retryIntervalRef.current);
+          retryIntervalRef.current = null;
+        }
+        return Math.max(0, n - 1);
+      });
+    }, 1000);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -29,6 +53,9 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
         await onSignUp({ email, password, firstName, lastName });
       }
     } catch (err) {
+      if (err instanceof RateLimitError) {
+        startRetryCountdown(err.retryAfterSeconds);
+      }
       setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
@@ -44,6 +71,12 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
           </p>
           <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">INCIDENT WIRE</p>
         </div>
+
+        {sessionExpired && (
+          <p className="mb-6 border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">
+            Your session ended. Sign in again to continue.
+          </p>
+        )}
 
         <div className="mb-6 flex border border-rule">
           <button
@@ -119,14 +152,27 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
             </>
           )}
 
-          {error && <p className="border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">{error}</p>}
+          {error && (
+            <p className="border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">
+              {error}
+              {retryIn > 0 && ` (${retryIn}s)`}
+            </p>
+          )}
 
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || retryIn > 0}
             className="mt-2 inline-flex min-h-11 items-center justify-center border border-ink text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper disabled:opacity-50"
           >
-            {busy ? (mode === "signin" ? "SIGNING IN…" : "CREATING ACCOUNT…") : mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
+            {retryIn > 0
+              ? `TRY AGAIN IN ${retryIn}S`
+              : busy
+                ? mode === "signin"
+                  ? "SIGNING IN…"
+                  : "CREATING ACCOUNT…"
+                : mode === "signin"
+                  ? "SIGN IN"
+                  : "CREATE ACCOUNT"}
           </button>
         </form>
       </div>

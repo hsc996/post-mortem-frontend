@@ -1,25 +1,42 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-04T18:00:00Z",
+  "generatedAt": "2026-09-04T00:00:00Z",
   "title": "Design System: PostMortem",
   "extensions": {
     "colorMeta": {
-      "accent": {
+      "nominal": {
         "role": "primary",
-        "displayName": "Wire Red",
-        "canonical": "oklch(48% 0.19 33) / oklch(68% 0.19 38)",
-        "tonalRamp": ["oklch(18% 0.10 33)", "oklch(28% 0.14 33)", "oklch(38% 0.17 33)", "oklch(48% 0.19 33)", "oklch(58% 0.19 35)", "oklch(68% 0.19 38)", "oklch(80% 0.14 40)", "oklch(92% 0.06 45)"]
+        "displayName": "Nominal Green",
+        "canonical": "oklch(43% 0.09 145) / oklch(72% 0.17 150)",
+        "tonalRamp": ["oklch(16% 0.03 145)", "oklch(26% 0.06 145)", "oklch(35% 0.08 145)", "oklch(43% 0.09 145)", "oklch(53% 0.12 148)", "oklch(63% 0.15 150)", "oklch(75% 0.16 150)", "oklch(90% 0.09 150)"],
+        "note": "The signal-lamp color for 'still live, working as expected' states: the header LIVE pulse dot, the MITIGATED status tag, and the default focus ring. Never used for OPEN or alarm states."
       },
-      "accent-ink": {
-        "role": "primary-on",
-        "displayName": "Wire Red Ink",
-        "canonical": "oklch(97% 0.01 85) / oklch(20% 0.01 250)"
+      "amber": {
+        "role": "primary-alt",
+        "displayName": "Amber",
+        "canonical": "oklch(41% 0.10 75) / oklch(80% 0.15 85)",
+        "tonalRamp": ["oklch(18% 0.04 75)", "oklch(28% 0.07 75)", "oklch(35% 0.09 75)", "oklch(41% 0.10 75)", "oklch(52% 0.12 78)", "oklch(64% 0.13 80)", "oklch(76% 0.14 83)", "oklch(90% 0.10 85)"],
+        "note": "The third rung of the status traffic light, spent on exactly one job: the OPEN status tag and its pulse dot. Distinct from both Nominal (stable/monitored) and Alarm (needs a human now)."
       },
-      "accent-dim": {
-        "role": "primary-muted",
-        "displayName": "Ember",
-        "canonical": "oklch(52% 0.07 45) / oklch(56% 0.09 40)",
-        "note": "Defined in tokens but not yet consumed by a shipped component; reserved for a future secondary-alert tier."
+      "alarm": {
+        "role": "secondary",
+        "displayName": "Alarm Red",
+        "canonical": "oklch(38% 0.16 27) / oklch(64% 0.22 27)",
+        "tonalRamp": ["oklch(15% 0.08 27)", "oklch(24% 0.13 27)", "oklch(31% 0.15 27)", "oklch(38% 0.16 27)", "oklch(48% 0.19 27)", "oklch(58% 0.21 27)", "oklch(72% 0.20 30)", "oklch(88% 0.10 35)"],
+        "note": "Reserved for genuine, blocking alarm states rendered as a solid fill: an expired mitigation and a version-conflict notice. Never used for a routine status."
+      },
+      "alarm-muted": {
+        "role": "secondary-quiet",
+        "displayName": "Alarm Muted",
+        "canonical": "oklch(45% 0.09 30) / oklch(62% 0.13 30)",
+        "tonalRamp": ["oklch(20% 0.04 30)", "oklch(30% 0.07 30)", "oklch(38% 0.08 30)", "oklch(45% 0.09 30)", "oklch(54% 0.11 30)", "oklch(62% 0.13 30)", "oklch(74% 0.12 32)", "oklch(88% 0.07 35)"],
+        "note": "Same alarm meaning at inline, non-blocking volume: form validation errors, a failed directory load, a session-expired notice, the feed's own WIRE DOWN state. Always a bordered text-only treatment, never a solid fill."
+      },
+      "alarm-ink": {
+        "role": "secondary-on",
+        "displayName": "Alarm Ink",
+        "canonical": "oklch(97% 0.01 85) / oklch(20% 0.005 250)",
+        "note": "Text/border color placed on top of an Alarm Red fill; also the inverse color on an alarm control's hover/focus state."
       },
       "paper": {
         "role": "neutral-bg",
@@ -36,7 +53,7 @@
         "role": "neutral-bg-raised",
         "displayName": "Bright Manila",
         "canonical": "oklch(97% 0.015 85) / oklch(20% 0.005 250)",
-        "note": "Not yet consumed by any shipped component."
+        "note": "The background behind both slide-over panels (incident detail, new-incident form) — a lighter paper tone than the page ground beneath it."
       },
       "ink": {
         "role": "neutral-text",
@@ -54,7 +71,7 @@
         "displayName": "Gunmetal",
         "canonical": "oklch(29% 0.005 240) / oklch(87% 0.005 240)",
         "tonalRamp": ["oklch(16% 0.005 240)", "oklch(29% 0.005 240)", "oklch(40% 0.005 240)", "oklch(52% 0.005 240)", "oklch(64% 0.005 240)", "oklch(74% 0.005 240)", "oklch(84% 0.005 240)", "oklch(93% 0.005 240)"],
-        "note": "Reserved for the masthead's double-rule border only."
+        "note": "Reserved for the masthead's double-rule border only. Repeated identically on the wire desk, login screen, and admin directory headers."
       },
       "steel-dim": {
         "role": "neutral-chrome-secondary",
@@ -65,19 +82,22 @@
       "rule": {
         "role": "neutral-border",
         "displayName": "Manila Rule",
-        "canonical": "oklch(78% 0.03 85) / oklch(27% 0.005 240)"
+        "canonical": "oklch(78% 0.03 85) / oklch(27% 0.005 240)",
+        "note": "The hairline divider between bulletins, and the border around every button, chip, segmented control, and input field."
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display / Masthead", "purpose": "The \"POSTMORTEM\" nameplate. Appears once, in the header." },
-      "headline": { "displayName": "Headline", "purpose": "A bulletin's incident title. Deliberately not bold." },
-      "title": { "displayName": "Precedence Title", "purpose": "FLASH/URGENT/BULLETIN/ROUTINE — severity as typography, never color." },
-      "body": { "displayName": "Body", "purpose": "Meta lines: reporter, elapsed time, mitigation summary." },
-      "label": { "displayName": "Label", "purpose": "Short tracked-out uppercase micro-labels: subtitle, LIVE, status tags, claim button." }
+      "display": { "displayName": "Display / Masthead", "purpose": "Orbitron. Used only for the \"POSTMORTEM\" nameplate, repeated on the wire desk, login screen, and admin directory headers." },
+      "title": { "displayName": "Title / Incident & Panel Headings", "purpose": "Chakra Petch. An incident's own title (bulletin row + detail panel) and a slide-over panel's own heading (e.g. \"FILE NEW INCIDENT\")." },
+      "body": { "displayName": "Body", "purpose": "JetBrains Mono. Meta lines: reporter, elapsed time, mitigation summary, form help text." },
+      "label": { "displayName": "Label", "purpose": "JetBrains Mono, tracked-out uppercase. Status tags, precedence stamps, buttons, form-field labels, role toggle, LIVE indicator, and ALL CLEAR / WIRE DOWN state headings." }
     },
     "motion": [
-      { "name": "pulse-ping", "value": "ping 1.5s cubic-bezier(0,0,0.2,1) infinite", "purpose": "The live-status dot's expanding ring, signaling an active/unresolved incident or the header's LIVE indicator." },
-      { "name": "cursor-blink", "value": "blink 1s steps(1) infinite", "purpose": "The loading state's teletype cursor block, evoking a wire machine receiving copy." }
+      { "name": "feed-container", "value": "staggerChildren: 0.06s (motion/react Variants)", "purpose": "The parent stagger driving the feed, both slide-over panels' section reveal, and the admin directory list. One shared entrance choreography, not per-surface animation." },
+      { "name": "feed-item-spring", "value": "opacity 0→1, y 16px→0, type: spring, stiffness: 120, damping: 20", "purpose": "Each child's own rise-and-settle within the shared stagger. Plays once per mount; a feed re-sort after claim/resolve doesn't replay it." },
+      { "name": "panel-slide", "value": "transform translate, 300ms, bottom-docked on mobile / right-docked at sm+", "purpose": "The incident detail panel and new-incident form's own entrance/exit, independent of the content stagger inside them." },
+      { "name": "pulse-ping", "value": "ping 1.5s cubic-bezier(0,0,0.2,1) infinite", "purpose": "The live-status dot's expanding ring, on the header LIVE indicator and an OPEN/MITIGATED status tag." },
+      { "name": "reduced-motion", "value": "MotionConfig reducedMotion=\"user\"", "purpose": "Wraps the whole desk; disengages the stagger/spring/slide choreography automatically for users with reduced-motion preferences set." }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" }
@@ -88,97 +108,121 @@
       "name": "Wire Header",
       "kind": "nav",
       "refersTo": "wire-header",
-      "description": "The single persistent masthead: nameplate, subtitle, and a live heartbeat cluster (pulsing dot + LIVE + real-time UTC wire clock).",
+      "description": "The single persistent masthead, repeated identically on the wire desk, login screen, and admin directory: nameplate (Orbitron), subtitle, and (on the wire desk) a live heartbeat cluster plus the signed-in user's name/role and an admin-only 'MANAGE USERS' link.",
       "html": "<header class=\"ds-wire-header\"><div class=\"ds-wire-header__brand\"><p class=\"ds-wire-header__nameplate\">POSTMORTEM</p><p class=\"ds-wire-header__subtitle\">INCIDENT WIRE</p></div><div class=\"ds-wire-header__live\"><span class=\"ds-pulse-dot\" aria-hidden=\"true\"><span class=\"ds-pulse-dot__ping\"></span><span class=\"ds-pulse-dot__core\"></span></span><span class=\"ds-wire-header__live-label\">LIVE</span><time class=\"ds-wire-header__clock\">15:53:05Z</time></div></header>",
-      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-wire-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 4px double var(--color-steel); font-family: 'JetBrains Mono', ui-monospace, monospace; } .ds-wire-header__nameplate { margin: 0; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; color: var(--color-ink); } .ds-wire-header__subtitle { margin: 2px 0 0; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--color-ink-dim); } .ds-wire-header__live { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; } .ds-wire-header__live-label { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; color: var(--color-accent); } .ds-wire-header__clock { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-pulse-dot { position: relative; display: inline-flex; height: 8px; width: 8px; } .ds-pulse-dot__ping { position: absolute; inset: 0; border-radius: 9999px; background: var(--color-accent); opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot__core { position: relative; height: 8px; width: 8px; border-radius: 9999px; background: var(--color-accent); }"
+      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-wire-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 4px double var(--color-steel); font-family: 'JetBrains Mono', ui-monospace, monospace; } .ds-wire-header__nameplate { margin: 0; font-family: 'Orbitron', Arial, sans-serif; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--color-ink); } .ds-wire-header__subtitle { margin: 2px 0 0; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; color: var(--color-ink-dim); } .ds-wire-header__live { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; } .ds-wire-header__live-label { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; color: var(--color-nominal); } .ds-wire-header__clock { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-pulse-dot { position: relative; display: inline-flex; height: 8px; width: 8px; } .ds-pulse-dot__ping { position: absolute; inset: 0; border-radius: 9999px; background: var(--color-nominal); opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot__core { position: relative; height: 8px; width: 8px; border-radius: 9999px; background: var(--color-nominal); }"
     },
     {
       "name": "Precedence Stamp",
       "kind": "custom",
       "refersTo": "title",
-      "description": "Severity read through typography alone — weight, size, and tracking escalate from ROUTINE to FLASH. Never color.",
+      "description": "Severity read through typography alone — weight, size, and tracking escalate from ROUTINE to FLASH. Never color. Set in JetBrains Mono, not a display face.",
       "html": "<span class=\"ds-precedence ds-precedence--flash\">FLASH</span>",
-      "css": ".ds-precedence { font-family: 'Courier Prime', 'JetBrains Mono', monospace; flex-shrink: 0; } .ds-precedence--flash { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--urgent { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--bulletin { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: var(--color-ink); } .ds-precedence--routine { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-ink-dim); }"
+      "css": ".ds-precedence { font-family: 'JetBrains Mono', ui-monospace, monospace; flex-shrink: 0; } .ds-precedence--flash { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--urgent { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink); } .ds-precedence--bulletin { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: var(--color-ink); } .ds-precedence--routine { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; color: var(--color-ink-dim); }"
     },
     {
       "name": "Status Tag",
       "kind": "chip",
-      "refersTo": "status-tag-live",
-      "description": "The only place color signals urgency: live states pulse in Wire Red, resolved sits flat in Faded Wire Ink.",
-      "html": "<span class=\"ds-status-tag ds-status-tag--live\"><span class=\"ds-pulse-dot ds-pulse-dot--sm\" aria-hidden=\"true\"><span class=\"ds-pulse-dot__ping\"></span><span class=\"ds-pulse-dot__core\"></span></span>MITIGATED</span>",
-      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-status-tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; } .ds-status-tag--live { color: var(--color-accent); } .ds-status-tag--resolved { color: var(--color-ink-dim); } .ds-pulse-dot--sm { height: 6px; width: 6px; } .ds-pulse-dot--sm .ds-pulse-dot__ping, .ds-pulse-dot--sm .ds-pulse-dot__core { height: 6px; width: 6px; border-radius: 9999px; background: var(--color-accent); } .ds-pulse-dot--sm .ds-pulse-dot__ping { position: absolute; inset: 0; opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot--sm .ds-pulse-dot__core { position: relative; }"
+      "refersTo": "status-tag-open",
+      "description": "The three-way status traffic light: OPEN pulses in Amber, MITIGATED pulses in Nominal Green, RESOLVED sits flat in Faded Wire Ink with no dot.",
+      "html": "<span class=\"ds-status-tag ds-status-tag--open\"><span class=\"ds-pulse-dot ds-pulse-dot--sm\" aria-hidden=\"true\"><span class=\"ds-pulse-dot__ping\"></span><span class=\"ds-pulse-dot__core\"></span></span>OPEN</span>",
+      "css": "@keyframes ds-ping { 75%, 100% { transform: scale(2); opacity: 0; } } .ds-status-tag { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; } .ds-status-tag--open { color: var(--color-amber); } .ds-status-tag--mitigated { color: var(--color-nominal); } .ds-status-tag--resolved { color: var(--color-ink-dim); } .ds-pulse-dot--sm { height: 6px; width: 6px; } .ds-pulse-dot--sm .ds-pulse-dot__ping, .ds-pulse-dot--sm .ds-pulse-dot__core { height: 6px; width: 6px; border-radius: 9999px; background: var(--color-amber); } .ds-pulse-dot--sm .ds-pulse-dot__ping { position: absolute; inset: 0; opacity: 0.6; animation: ds-ping 1.5s cubic-bezier(0,0,0.2,1) infinite; } .ds-pulse-dot--sm .ds-pulse-dot__core { position: relative; }"
     },
     {
       "name": "Incident Bulletin",
       "kind": "card",
       "refersTo": "incident-bulletin",
-      "description": "The feed row itself: no card shell, just a hairline bottom border, full-bleed against the page. Hovers to a flat tint, never a shadow.",
+      "description": "The feed row itself: no card shell, just a hairline bottom border, full-bleed against the page. Title is set in Chakra Petch; everything else stays in JetBrains Mono. Hovers to a flat tint, never a shadow.",
       "html": "<article class=\"ds-bulletin\"><div class=\"ds-bulletin__top\"><span class=\"ds-precedence ds-precedence--urgent\">URGENT</span><span class=\"ds-bulletin__meta\">14:58Z</span><span class=\"ds-bulletin__meta\">auth-service</span></div><h2 class=\"ds-bulletin__title\">Elevated login latency after cert rotation</h2><div class=\"ds-bulletin__meta\">REPORTED BY T. ÁLVAREZ · 54M AGO</div></article>",
-      "css": ".ds-bulletin { border-bottom: 1px solid var(--color-rule); padding: 16px 20px; transition: background-color 0.15s; font-family: 'JetBrains Mono', monospace; } .ds-bulletin:hover { background-color: color-mix(in srgb, var(--color-paper-dim) 60%, transparent); } .ds-bulletin__top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; } .ds-bulletin__meta { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-bulletin__title { margin: 4px 0 8px; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 16px; font-weight: 400; color: var(--color-ink); }"
+      "css": ".ds-bulletin { border-bottom: 1px solid var(--color-rule); padding: 16px 20px; transition: background-color 0.15s; font-family: 'JetBrains Mono', monospace; } .ds-bulletin:hover { background-color: color-mix(in srgb, var(--color-paper-dim) 60%, transparent); } .ds-bulletin__top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; } .ds-bulletin__meta { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--color-ink-dim); } .ds-bulletin__title { margin: 4px 0 8px; font-family: 'Chakra Petch', Arial, sans-serif; font-size: 20px; font-weight: 600; color: var(--color-ink); }"
     },
     {
-      "name": "Mitigation Readout — Active",
+      "name": "Segmented Control",
       "kind": "custom",
-      "refersTo": "mitigation-readout",
-      "description": "A live TTL countdown, recomputed every second against the real clock — read-time truth, not a cached push.",
-      "html": "<div class=\"ds-mitigation\"><span class=\"ds-mitigation__summary\">Pinned previous cert chain on edge nodes</span><span class=\"ds-mitigation__expiry\">EXPIRES 58:51</span></div>",
-      "css": ".ds-mitigation { display: flex; align-items: center; gap: 8px; border: 1px solid var(--color-rule); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; } .ds-mitigation__summary { font-size: 12px; color: var(--color-ink-dim); } .ds-mitigation__expiry { margin-left: auto; flex-shrink: 0; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-ink); }"
+      "refersTo": "segment-active",
+      "description": "One bordered, divided strip reused across three unrelated surfaces: the new-incident severity picker, the admin role toggle, and the login screen's sign-in/register tabs. Active segment inverts to Wire Ink fill.",
+      "html": "<div class=\"ds-segmented\"><button class=\"ds-segmented__item ds-segmented__item--active\">MEDIUM</button><button class=\"ds-segmented__item\">LOW</button></div>",
+      "css": ".ds-segmented { display: flex; border: 1px solid var(--color-rule); } .ds-segmented__item { min-height: 44px; flex: 1; padding: 0 12px; border-left: 1px solid var(--color-rule); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--color-ink-dim); background: transparent; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-segmented__item:first-child { border-left: none; } .ds-segmented__item:hover { color: var(--color-ink); } .ds-segmented__item--active, .ds-segmented__item--active:hover { background: var(--color-ink); color: var(--color-paper); }"
     },
     {
       "name": "Mitigation Readout — Expired",
       "kind": "custom",
       "refersTo": "mitigation-readout-expired",
-      "description": "The alarm state: a solid Wire Red fill, the one other place besides the live-status dot where the reserved accent is spent.",
+      "description": "The alarm state: a solid Alarm Red fill, one of two places the reserved blocking-alarm signal is spent (the other being the version-conflict notice).",
       "html": "<div class=\"ds-mitigation-expired\">MITIGATION EXPIRED 36:08 AGO — UNWIND REQUIRED</div>",
-      "css": ".ds-mitigation-expired { display: flex; align-items: center; border: 1px solid var(--color-accent); background: var(--color-accent); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-accent-ink); }"
+      "css": ".ds-mitigation-expired { display: flex; align-items: center; border: 1px solid var(--color-alarm); background: var(--color-alarm); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--color-alarm-ink); }"
     },
     {
-      "name": "Claim Control — Unclaimed",
+      "name": "Conflict Notice",
+      "kind": "custom",
+      "refersTo": "conflict-notice",
+      "description": "Blocking alarm-state notice for a detected concurrent edit (optimistic-locking version conflict) in the incident detail panel — the same solid Alarm Red pattern as the expired mitigation. It replaces the panel's action row entirely until reloaded.",
+      "html": "<div class=\"ds-conflict\" role=\"alert\"><p class=\"ds-conflict__message\">CONFLICT: incident was updated by another request. Expected version 4, but current version is 5.</p><button type=\"button\" class=\"ds-conflict__reload\">RELOAD LATEST</button></div>",
+      "css": ".ds-conflict { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--color-alarm); background: var(--color-alarm); padding: 12px; font-family: 'JetBrains Mono', monospace; } .ds-conflict__message { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.6; color: var(--color-alarm-ink); } .ds-conflict__reload { display: inline-flex; align-self: flex-start; min-height: 44px; align-items: center; border: 1px solid var(--color-alarm-ink); background: transparent; padding: 0 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--color-alarm-ink); cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-conflict__reload:hover, .ds-conflict__reload:focus-visible { background: var(--color-alarm-ink); color: var(--color-alarm); }"
+    },
+    {
+      "name": "Claim Control — Unclaimed / Claimed",
       "kind": "button",
       "refersTo": "button-claim",
-      "description": "The primary action: outlined at rest, fully inverts fill/text on hover and focus alike.",
+      "description": "The primary action: outlined at rest, fully inverts fill/text on hover and focus alike. Once claimed, it becomes a static stamp, not a toggle — ownership as a permanent mark, matching the audit trail's append-only discipline.",
       "html": "<button class=\"ds-claim-btn\" type=\"button\">CLAIM</button>",
-      "css": ".ds-claim-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--color-ink); background: transparent; color: var(--color-ink); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-claim-btn:hover, .ds-claim-btn:focus-visible { background: var(--color-ink); color: var(--color-paper); }"
+      "css": ".ds-claim-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--color-ink); background: transparent; color: var(--color-ink); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-claim-btn:hover, .ds-claim-btn:focus-visible { background: var(--color-ink); color: var(--color-paper); } .ds-claimed-stamp { display: inline-flex; align-items: center; border: 1px solid var(--color-rule); padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--color-ink-dim); }"
     },
     {
-      "name": "Claim Control — Claimed",
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "The shared field style behind the new-incident form and both auth forms: always-visible tracked-out label above a bordered, transparent-background input at the 44px touch-target floor.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"email\">EMAIL</label><input class=\"ds-field__input\" id=\"email\" type=\"email\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-field__label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--color-ink-dim); } .ds-field__input { min-height: 44px; width: 100%; border: 1px solid var(--color-rule); background: transparent; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--color-ink); } .ds-field__input::placeholder { color: var(--color-ink-dim); } .ds-field__input:focus-visible { outline: 2px solid var(--color-nominal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Empty / Error State Heading",
       "kind": "custom",
-      "refersTo": "button-claim",
-      "description": "Once claimed, the control becomes a static stamp, not a toggle — ownership as a permanent mark, matching the audit trail's append-only discipline.",
-      "html": "<span class=\"ds-claimed-stamp\">CLAIMED — H. SCAIFE</span>",
-      "css": ".ds-claimed-stamp { display: inline-flex; align-items: center; border: 1px solid var(--color-rule); padding: 4px 8px; font-family: 'Courier Prime', 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--color-ink-dim); }"
+      "refersTo": "label",
+      "description": "The feed's two terminal states: ALL CLEAR (Nominal Green, bold) when there are no incidents, WIRE DOWN (Alarm Muted, bold — quiet, non-blocking volume) on a load failure. Both are JetBrains Mono labels, not a display face.",
+      "html": "<p class=\"ds-state-heading ds-state-heading--nominal\">ALL CLEAR</p>",
+      "css": ".ds-state-heading { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; letter-spacing: 0.08em; } .ds-state-heading--nominal { color: var(--color-nominal); } .ds-state-heading--alarm { color: var(--color-alarm-muted); }"
     }
   ],
   "narrative": {
     "northStar": "The Incident Wire",
-    "overview": "PostMortem's dashboard is not a status-card grid — it's a continuous wire feed, the same discipline a newsroom telex applies to incoming copy: timestamped, precedence-graded, append-only, never silently edited. This is a deliberate refusal of the generic-SaaS dashboard default (colored status pills in a card grid); the system's own thesis is that the audit-trail discipline the product is built on — nothing is silently overwritten, every action punches a new line — deserves a visual form that behaves the same way. The page reads top-down like dispatch copy, most urgent and most recent first, not as a dashboard the eye has to hunt across.\n\nThe palette is near-monochrome by design: warm manila paper and dark ink by day, gunmetal ground and amber ink by night — the same machine under a different light source, not an inverted theme. A single hot accent, Wire Red, is spent almost nowhere, which is exactly why it reads instantly when it appears: the live/unresolved state, and the alarm when a mitigation's TTL has run out. Severity itself never touches color at all — FLASH/URGENT/BULLETIN/ROUTINE is a typographic ladder of weight and size, the wire service's own precedence vocabulary. Every surface is flat: no shadows, no rounded corners anywhere except the two functional live-pulse dots. Component feel is restrained and exacting — every stroke deliberate, nothing decorative, nothing added for warmth that isn't earned by function.",
+    "overview": "PostMortem's dashboard is not a status-card grid — it's a continuous wire feed, the same discipline a newsroom telex applies to incoming copy: timestamped, precedence-graded, append-only, never silently edited. This is a deliberate refusal of the generic-SaaS dashboard default (colored status pills in a card grid); the system's own thesis is that the audit-trail discipline the product is built on — nothing is silently overwritten, every action punches a new line — deserves a visual form that behaves the same way. The page reads top-down like dispatch copy, most urgent and most recent first, not as a dashboard the eye has to hunt across.\n\nThe palette is near-monochrome by design: warm manila paper and dark ink by day, gunmetal ground and amber ink by night — the same machine under a different light source, not an inverted theme. Against that neutral field sit two reserved signal-lamp colors, nominal green and alarm red, plus a third traffic-light rung, amber, spent on exactly one job: the OPEN status. Nominal green means \"still live, working as expected.\" Alarm red — as a solid fill — means \"this needs a human now,\" and its quieter cousin, alarm-muted, carries the same meaning at a lower volume for inline error text and non-blocking load failures. Severity itself never touches color at all — FLASH/URGENT/BULLETIN/ROUTINE is a typographic ladder of weight and size, the wire service's own precedence vocabulary. The desk gained a second typographic voice since its first cut: Orbitron for the masthead nameplate alone, and Chakra Petch reserved for an incident's own title and the two slide-over panels that carry one. Everything else — status, meta lines, the audit trail, every form field, every button label — still runs in JetBrains Mono, the machine's own instrumentation face. Every surface is flat: no shadows, no rounded corners anywhere except the two functional live-pulse dots. New surfaces (the incident detail panel, the new-incident form, the admin user directory) mount with a shared, quiet spring stagger rather than snapping into place, but the system stays otherwise as restrained as it always was: nothing decorative, nothing added for warmth that isn't earned by function.",
     "keyCharacteristics": [
       "Continuous append-only feed, not a card grid — one bulletin per incident, dividers not gutters.",
-      "Near-monochrome manila/gunmetal palette with exactly one reserved hot accent.",
+      "Near-monochrome manila/gunmetal palette with a three-color status ladder (amber/nominal/dim) and two reserved alarm colors (full-fill alarm, quieter alarm-muted) that never do routine-status duty.",
       "Severity communicated by typography (weight, size, tracking), never by color.",
+      "Two typographic voices, both rare: Orbitron for the masthead only, Chakra Petch for incident titles and panel headings only. Everything else is JetBrains Mono.",
       "Zero shadows, zero border-radius except the two functional pulse dots.",
-      "Day desk / night desk: light and dark are two lighting conditions on one machine, not an inversion."
+      "Day desk / night desk: light and dark are two lighting conditions on one machine, not an inversion.",
+      "New panels and lists mount with a shared staggered-spring entrance; the choreography is a system rule, not a one-off flourish."
     ],
     "rules": [
-      { "name": "The One Signal Rule", "body": "Wire Red appears in exactly two places: the live/unresolved status indicator and the expired-mitigation alarm. It is never used for hover states, severity, or emphasis of any other kind — if everything can turn red, nothing does.", "section": "colors" },
-      { "name": "The Day Desk / Night Desk Rule", "body": "Light and dark mode are not an inverted palette — they're two lighting conditions on the same machine (prefers-color-scheme, not a manual toggle). Every neutral and the accent both get an explicit day value and an explicit night value; neither is derived by inverting the other.", "section": "colors" },
+      { "name": "The Reserved-Signal Rule", "body": "Amber, Nominal, and Alarm each mean exactly one thing and never trade places: Amber is \"open, needs action.\" Nominal is \"live and working as expected.\" Alarm (full fill) is \"needs a human right now\"; Alarm Muted is the same meaning at inline, non-blocking volume.", "section": "colors" },
+      { "name": "The Day Desk / Night Desk Rule", "body": "Light and dark mode are not an inverted palette — they're two lighting conditions on the same machine (prefers-color-scheme, not a manual toggle). Every neutral and every signal color gets an explicit day value and an explicit night value; neither is derived by inverting the other.", "section": "colors" },
+      { "name": "The Two-Voice Rule", "body": "Orbitron is spent on exactly one element: the masthead nameplate. Chakra Petch is spent on exactly two: an incident's title and a slide-over panel's own heading. Every other element runs in JetBrains Mono.", "section": "typography" },
       { "name": "The Precedence-By-Weight Rule", "body": "Severity is FLASH / URGENT / BULLETIN / ROUTINE — words, never a color chip — and each step down the ladder loses weight, size, and tracking in the same motion. A reader triages by glancing at type density alone.", "section": "typography" },
-      { "name": "The Flat Wire Rule", "body": "No shadow, ever. If something needs to feel more important, it gets a heavier border or the one reserved accent color — never a drop shadow pretending the screen has depth it doesn't.", "section": "elevation" },
-      { "name": "The Right-Angle Rule", "body": "Radius is reserved for exactly one thing: the circular pulse indicator that means \"this is live.\" Every other shape in the system is a hard rectangle.", "section": "elevation" }
+      { "name": "The Flat Wire Rule", "body": "No shadow, ever. If something needs to feel more important, it gets a heavier border, a lighter/raised paper tone, or one of the reserved signal colors — never a drop shadow pretending the screen has depth it doesn't.", "section": "elevation" },
+      { "name": "The Right-Angle Rule", "body": "Radius is reserved for exactly one thing: the circular pulse indicator that means \"this is live.\" Every other shape in the system is a hard rectangle.", "section": "elevation" },
+      { "name": "The One-Entrance Rule", "body": "Every data-bearing surface that mounts — the feed, a slide-over panel, the admin directory — uses the same stagger-and-spring choreography, never a bespoke animation per surface.", "section": "motion" }
     ],
     "dos": [
-      "Do reserve Wire Red exclusively for the live/unresolved status signal and the expired-mitigation alarm — nowhere else.",
-      "Do communicate severity through the Courier Prime weight/size/tracking ladder (FLASH → ROUTINE), never through a color chip.",
+      "Do keep Amber, Nominal, and Alarm each meaning exactly one thing — OPEN, \"live and working,\" and \"needs a human now,\" respectively.",
+      "Do communicate severity through the weight/size/tracking ladder (FLASH → ROUTINE), never through a color chip.",
       "Do give every color token an explicit day value and an explicit night value tied to prefers-color-scheme — never derive dark mode by inverting light mode.",
       "Do keep every rectangular surface at 0 radius; the only permitted curve is the functional live-pulse dot.",
+      "Do limit Orbitron to the masthead nameplate and Chakra Petch to incident titles and panel headings; everything else runs in JetBrains Mono.",
+      "Do reuse the bordered segmented-control pattern (severity picker, role toggle, auth tabs) rather than inventing a new selector style per form.",
+      "Do use the shared stagger-and-spring entrance for any new data-bearing surface, and respect reducedMotion=\"user\" rather than hardcoding animation.",
       "Do set font-variant-numeric: tabular-nums on any live-updating numeral — clocks, countdowns, elapsed-time strings — so digits never jitter the layout.",
       "Do keep interactive targets at a minimum 44px height, per the product's ICU-grade accessibility commitment."
     ],
     "donts": [
-      "Don't add a second accent hue, a gradient, or a tinted shadow — the palette's entire force comes from staying near-monochrome with one reserved color.",
-      "Don't add box-shadow or simulated elevation anywhere; depth is stroke weight and tint delta only.",
-      "Don't round a button, card, or divider; radius is spent entirely on the two pulse-dot indicators.",
-      "Don't use the wire typeface (Courier Prime) for dense body or meta copy — it's reserved for the masthead, bulletin headlines, precedence stamps, and short control labels; long-running text stays in JetBrains Mono.",
+      "Don't use Amber, Nominal Green, and Alarm Red interchangeably, or introduce a further general-purpose accent — the palette's force comes from each hue meaning exactly one thing.",
+      "Don't give a form field a colored border to signal an error; errors are their own text-only Alarm Muted line, never a recolored input.",
+      "Don't add box-shadow or simulated elevation anywhere; depth is stroke weight, tint delta, and (for panels) a lighter paper tone — never a shadow.",
+      "Don't round a button, card, divider, or form field; radius is spent entirely on the pulse-dot indicators.",
+      "Don't spread either display typeface beyond its one reserved job — Orbitron is not a general headline face, and Chakra Petch is not a body or label face.",
       "Don't turn \"claimed\" into a toggle a responder can undo casually — claiming is a stamp, a one-way mark, matching the audit trail's append-only discipline."
     ]
   }

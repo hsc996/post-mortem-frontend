@@ -1,30 +1,31 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MotionConfig } from "motion/react";
-import type { AuditEntry, Incident, Severity } from "../../types/incident";
-import type { PanelActionResult } from "../../types/panelAction";
+import type { Incident, Severity } from "../../types/incident";
 import type { AuthUser } from "../../types/user";
 import { canMutate, toCurrentUser } from "../../types/user";
-import { mockIncidents, fetchIncidents } from "../../data/mockIncidents";
-import { buildAllAuditTrails } from "../../data/mockAuditTrail";
 import { useClock } from "../../hooks/useClock";
+import { useIncidents } from "../../hooks/useIncidents";
 import { mitigationClock } from "../../lib/wireFormat";
-import { createId } from "../../lib/id";
 import { WireHeader } from "./WireHeader";
 import { IncidentFeed } from "./IncidentFeed";
 import { LoadingState, type SkeletonSpec } from "./LoadingState";
 import { ErrorState } from "./ErrorState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
 
-const SKELETON_SPECS: SkeletonSpec[] = mockIncidents.map((incident) => ({
-  hasMitigation: !!incident.mitigation,
-  actionRowKind: incident.status === "resolved" ? "none" : incident.assigneeName ? "badge" : "button",
-}));
+const LOADING_SKELETON_SPECS: SkeletonSpec[] = [
+  { hasMitigation: false, actionRowKind: "button" },
+  { hasMitigation: true, actionRowKind: "badge" },
+  { hasMitigation: true, actionRowKind: "badge" },
+  { hasMitigation: false, actionRowKind: "button" },
+  { hasMitigation: false, actionRowKind: "none" },
+  { hasMitigation: false, actionRowKind: "none" },
+];
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const PERMISSION_DENIED = "Operation not permitted for current user role.";
 
 interface IncidentDeskProps {
   currentUser: AuthUser;
+  token: string;
   onSignOut: () => void;
 }
 
@@ -49,147 +50,34 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   });
 }
 
-export function IncidentDesk({ currentUser: authUser, onSignOut }: IncidentDeskProps) {
+export function IncidentDesk({ currentUser: authUser, token, onSignOut }: IncidentDeskProps) {
   const now = useClock();
   const currentUser = toCurrentUser(authUser);
-  const [incidents, setIncidents] = useState<Incident[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-  const [auditTrail, setAuditTrail] = useState<Record<string, AuditEntry[]>>({});
+  const { incidents, loadError, retry, auditTrail, loadAuditTrail, claim, resolve, unwind } = useIncidents(token);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const openerRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchIncidents()
-      .then((data) => {
-        if (cancelled) return;
-        setIncidents(data);
-        setAuditTrail(buildAllAuditTrails(data));
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setLoadError(err instanceof Error ? err.message : "Failed to load incidents.");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loadAttempt]);
-
-  const handleRetry = () => {
-    setLoadError(null);
-    setLoadAttempt((n) => n + 1);
-  };
-
   const sorted = useMemo(() => (incidents ? sortIncidents(incidents, now) : []), [incidents, now]);
-
-  const recordAuditEntry = (id: string, entry: AuditEntry) => {
-    setAuditTrail((prev) => ({ ...prev, [id]: [entry, ...(prev[id] ?? [])] }));
-  };
-
-  const handleClaim = (id: string) => {
-    if (!canMutate(currentUser.role)) return;
-    setIncidents((current) =>
-      current
-        ? current.map((incident) =>
-            incident.id === id
-              ? { ...incident, assigneeName: currentUser.name, version: incident.version + 1 }
-              : incident,
-          )
-        : current,
-    );
-    recordAuditEntry(id, {
-      id: createId("audit"),
-      incidentId: id,
-      action: "INCIDENT_UPDATED",
-      actorName: currentUser.name,
-      occurredAt: new Date().toISOString(),
-      detail: `Claimed by ${currentUser.name}`,
-    });
-  };
 
   const findLive = (id: string) => incidents?.find((incident) => incident.id === id);
 
-  const commitUpdate = (updated: Incident, entry: AuditEntry): PanelActionResult => {
-    setIncidents((current) => (current ? current.map((incident) => (incident.id === updated.id ? updated : incident)) : current));
-    recordAuditEntry(updated.id, entry);
-    return { ok: true, incident: updated };
+  const handleClaim = (id: string) => {
+    if (!canMutate(currentUser.role)) return;
+    const live = findLive(id);
+    if (!live) return;
+    void claim(id, live.version, authUser.id);
   };
 
-  const handlePanelClaim = (id: string, expectedVersion: number): PanelActionResult => {
-    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
-    const live = findLive(id);
-    if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
-    if (live.version !== expectedVersion) {
-      return { ok: false, kind: "conflict", expected: expectedVersion, current: live.version };
-    }
-    const updated: Incident = { ...live, assigneeName: currentUser.name, version: live.version + 1 };
-    return commitUpdate(updated, {
-      id: createId("audit"),
-      incidentId: id,
-      action: "INCIDENT_UPDATED",
-      actorName: currentUser.name,
-      occurredAt: new Date().toISOString(),
-      detail: `Claimed by ${currentUser.name}`,
-    });
-  };
-
-  const handlePanelUnwind = (id: string, expectedVersion: number): PanelActionResult => {
-    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
-    const live = findLive(id);
-    if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
-    if (live.version !== expectedVersion) {
-      return { ok: false, kind: "conflict", expected: expectedVersion, current: live.version };
-    }
-    const clearedSummary = live.mitigation?.summary;
-    const updated: Incident = {
-      ...live,
-      mitigation: null,
-      status: live.status === "mitigated" ? "open" : live.status,
-      version: live.version + 1,
-    };
-    return commitUpdate(updated, {
-      id: createId("audit"),
-      incidentId: id,
-      action: "MITIGATION_DELETED",
-      actorName: currentUser.name,
-      occurredAt: new Date().toISOString(),
-      detail: clearedSummary ? `Cleared: ${clearedSummary}` : undefined,
-    });
-  };
-
-  const handlePanelResolve = (id: string, expectedVersion: number): PanelActionResult => {
-    if (!canMutate(currentUser.role)) return { ok: false, kind: "blocked", reason: PERMISSION_DENIED };
-    const live = findLive(id);
-    if (!live) return { ok: false, kind: "conflict", expected: expectedVersion, current: expectedVersion };
-    if (live.version !== expectedVersion) {
-      return { ok: false, kind: "conflict", expected: expectedVersion, current: live.version };
-    }
-    if (live.mitigation) {
-      return {
-        ok: false,
-        kind: "blocked",
-        reason:
-          "Cannot resolve an incident with an active mitigation. Clear the mitigation first via DELETE /incidents/{incident_id}/mitigation.",
-      };
-    }
-    const resolvedAt = new Date().toISOString();
-    const updated: Incident = { ...live, status: "resolved", resolvedAt, version: live.version + 1 };
-    return commitUpdate(updated, {
-      id: createId("audit"),
-      incidentId: id,
-      action: "INCIDENT_RESOLVED",
-      actorName: currentUser.name,
-      occurredAt: resolvedAt,
-      detail: "Marked resolved",
-    });
-  };
+  const handlePanelClaim = (id: string, expectedVersion: number) => claim(id, expectedVersion, authUser.id);
+  const handlePanelResolve = (id: string) => resolve(id);
+  const handlePanelUnwind = (id: string) => unwind(id);
 
   const handleSelect = (id: string, opener: HTMLElement) => {
     openerRef.current = opener;
     setSelectedIncidentId(id);
     setPanelOpen(true);
+    void loadAuditTrail(id);
   };
 
   const handleClosePanel = () => {
@@ -226,9 +114,9 @@ export function IncidentDesk({ currentUser: authUser, onSignOut }: IncidentDeskP
       >
         {incidents === null ? (
           loadError ? (
-            <ErrorState message={loadError} onRetry={handleRetry} />
+            <ErrorState message={loadError} onRetry={retry} />
           ) : (
-            <LoadingState specs={SKELETON_SPECS} />
+            <LoadingState specs={LOADING_SKELETON_SPECS} />
           )
         ) : (
           <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />

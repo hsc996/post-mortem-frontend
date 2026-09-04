@@ -3,7 +3,7 @@ import { LoginScreen } from "./components/Auth/LoginScreen";
 import { useAuth } from "./hooks/useAuth";
 
 function App() {
-  const { status, user, signIn, signUp, signOut } = useAuth();
+  const { status, user, token, signIn, signUp, signOut } = useAuth();
 
   if (status === "checking") {
     return (
@@ -13,11 +13,11 @@ function App() {
     );
   }
 
-  if (status === "unauthenticated" || !user) {
+  if (status === "unauthenticated" || !user || !token) {
     return <LoginScreen onSignIn={signIn} onSignUp={signUp} />;
   }
 
-  return <IncidentDesk currentUser={user} onSignOut={signOut} />;
+  return <IncidentDesk currentUser={user} token={token} onSignOut={signOut} />;
 }
 
 export default App;

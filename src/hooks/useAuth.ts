@@ -57,5 +57,5 @@ export function useAuth() {
     setStatus("unauthenticated");
   }, [token]);
 
-  return { status, user, signIn, signUp, signOut };
+  return { status, user, token, signIn, signUp, signOut };
 }

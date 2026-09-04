@@ -1,35 +1,7 @@
 import type { AuthUser } from "../types/user";
+import { API_BASE, ApiError, authFetch, parseError } from "./apiClient";
 
-const API_BASE = "http://localhost:8000/api/v1";
-
-export class ApiError extends Error {}
-
-/** FastAPI errors are either a plain string detail or a list of pydantic validation errors. */
-function extractDetail(body: unknown, fallback: string): string {
-  if (body && typeof body === "object" && "detail" in body) {
-    const detail = (body as { detail: unknown }).detail;
-    if (typeof detail === "string") return detail;
-    if (Array.isArray(detail)) {
-      return detail
-        .map((e) => (e && typeof e === "object" && "msg" in e ? String((e as { msg: unknown }).msg) : String(e)))
-        .join("; ");
-    }
-  }
-  return fallback;
-}
-
-async function parseError(response: Response): Promise<never> {
-  if (response.status === 429) {
-    throw new ApiError("Too many attempts. Wait a moment before trying again.");
-  }
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch {
-    body = null;
-  }
-  throw new ApiError(extractDetail(body, `Request failed (${response.status}).`));
-}
+export { ApiError };
 
 function toAuthUser(u: {
   id: string;
@@ -59,7 +31,7 @@ export async function login(email: string, password: string): Promise<string> {
       body,
     });
   } catch {
-    throw new ApiError("Can't reach the backend. Is it running?");
+    throw new ApiError("Can't reach the backend. Is it running?", 0);
   }
   if (!response.ok) await parseError(response);
   const data = (await response.json()) as { access_token: string };
@@ -87,30 +59,20 @@ export async function register(input: RegisterInput): Promise<void> {
       }),
     });
   } catch {
-    throw new ApiError("Can't reach the backend. Is it running?");
+    throw new ApiError("Can't reach the backend. Is it running?", 0);
   }
   if (!response.ok) await parseError(response);
 }
 
 export async function fetchMe(token: string): Promise<AuthUser> {
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } catch {
-    throw new ApiError("Can't reach the backend. Is it running?");
-  }
+  const response = await authFetch(token, "/auth/me");
   if (!response.ok) await parseError(response);
   return toAuthUser(await response.json());
 }
 
 export async function logout(token: string): Promise<void> {
   try {
-    await fetch(`${API_BASE}/auth/logout`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await authFetch(token, "/auth/logout", { method: "POST" });
   } catch {
     // Best-effort server-side revoke; the client clears its own token regardless.
   }

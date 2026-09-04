@@ -74,6 +74,7 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
                 name="firstName"
                 autoComplete="given-name"
                 required
+                containerClassName="flex-1"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
@@ -82,6 +83,7 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
                 name="lastName"
                 autoComplete="family-name"
                 required
+                containerClassName="flex-1"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -103,15 +105,18 @@ export function LoginScreen({ onSignIn, onSignUp }: LoginScreenProps) {
             type="password"
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
             required
-            minLength={mode === "register" ? 8 : undefined}
+            minLength={mode === "register" ? 12 : undefined}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
           {mode === "register" && (
-            <p className="text-xs text-ink-dim">
-              New accounts start as VIEWER (read-only). An admin can grant write access afterward.
-            </p>
+            <>
+              <p className="text-xs text-ink-dim">Must be at least 12 characters.</p>
+              <p className="text-xs text-ink-dim">
+                New accounts start as VIEWER (read-only). An admin can grant write access afterward.
+              </p>
+            </>
           )}
 
           {error && <p className="border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">{error}</p>}

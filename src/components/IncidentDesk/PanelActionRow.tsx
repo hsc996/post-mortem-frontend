@@ -11,6 +11,7 @@ interface PanelActionRowProps {
   onUnwind: () => void;
   blockedReason: string | null;
   successMessage: string | null;
+  pending: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export function PanelActionRow({
   onUnwind,
   blockedReason,
   successMessage,
+  pending,
 }: PanelActionRowProps) {
   if (incident.status === "resolved") {
     return <p className="text-xs text-ink-dim">Resolved — no further action needed.</p>;
@@ -40,13 +42,14 @@ export function PanelActionRow({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <ClaimControl assigneeName={incident.assigneeName} onClaim={onClaim} shortcutHint="C" />
-        {incident.mitigation && <UnwindControl onUnwind={onUnwind} />}
+      <div className={`flex flex-wrap items-center gap-x-2 gap-y-4 ${pending ? "opacity-50" : ""}`}>
+        <ClaimControl assigneeName={incident.assigneeName} onClaim={pending ? () => {} : onClaim} shortcutHint="C" />
+        {incident.mitigation && <UnwindControl onUnwind={pending ? () => {} : onUnwind} />}
         <button
           type="button"
           onClick={onResolve}
-          className="ml-auto inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+          disabled={pending}
+          className="ml-auto inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper disabled:pointer-events-none"
         >
           RESOLVE
           <KeyHint char="R" />

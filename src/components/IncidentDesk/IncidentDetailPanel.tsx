@@ -18,9 +18,9 @@ interface IncidentDetailPanelProps {
   canAct: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onClaim: (id: string, expectedVersion: number) => PanelActionResult;
-  onResolve: (id: string, expectedVersion: number) => PanelActionResult;
-  onUnwind: (id: string, expectedVersion: number) => PanelActionResult;
+  onClaim: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
+  onResolve: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
+  onUnwind: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
 }
 
 /**
@@ -51,14 +51,17 @@ export function IncidentDetailPanel({
   const [conflict, setConflict] = useState<{ expected: number; current: number } | null>(null);
   const [blockedReason, setBlockedReason] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (isOpen) closeButtonRef.current?.focus();
   }, [isOpen]);
 
   const dispatch = useCallback(
-    (action: (id: string, version: number) => PanelActionResult, successText: string) => {
-      const result = action(snapshot.id, snapshot.version);
+    async (action: (id: string, version: number) => Promise<PanelActionResult>, successText: string) => {
+      setPending(true);
+      const result = await action(snapshot.id, snapshot.version);
+      setPending(false);
       if (!result.ok) {
         setSuccessMessage(null);
         if (result.kind === "conflict") {
@@ -96,20 +99,21 @@ export function IncidentDetailPanel({
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const isResolved = snapshot.status === "resolved";
       const key = e.key.toLowerCase();
+      if (pending) return;
       if (key === "c" && canAct && !isResolved && !snapshot.assigneeName) {
         e.preventDefault();
-        dispatch(onClaim, "Claimed.");
+        void dispatch(onClaim, "Claimed.");
       } else if (key === "r" && canAct && !isResolved) {
         e.preventDefault();
-        dispatch(onResolve, "Resolved.");
+        void dispatch(onResolve, "Resolved.");
       } else if (key === "u" && canAct && !isResolved && snapshot.mitigation) {
         e.preventDefault();
-        dispatch(onUnwind, "Mitigation cleared.");
+        void dispatch(onUnwind, "Mitigation cleared.");
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind]);
+  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind, pending]);
 
   return (
     <aside
@@ -162,11 +166,12 @@ export function IncidentDetailPanel({
             <PanelActionRow
               incident={snapshot}
               canAct={canAct}
-              onClaim={() => dispatch(onClaim, "Claimed.")}
-              onResolve={() => dispatch(onResolve, "Resolved.")}
-              onUnwind={() => dispatch(onUnwind, "Mitigation cleared.")}
+              onClaim={() => void dispatch(onClaim, "Claimed.")}
+              onResolve={() => void dispatch(onResolve, "Resolved.")}
+              onUnwind={() => void dispatch(onUnwind, "Mitigation cleared.")}
               blockedReason={blockedReason}
               successMessage={successMessage}
+              pending={pending}
             />
           )}
         </motion.div>

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { motion, MotionConfig } from "motion/react";
 import { ApiError, type RegisterInput } from "../../lib/authApi";
 import { RateLimitError } from "../../lib/apiClient";
+import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
 import { TextField } from "./TextField";
 
 interface LoginScreenProps {
@@ -63,22 +65,26 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="flex min-h-screen items-center justify-center bg-paper px-5">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
+      <motion.div className="w-full max-w-sm" initial="hidden" animate="show" variants={feedContainerVariants}>
+        <motion.div variants={feedItemVariants} className="mb-8 text-center">
           <p className="font-display text-xl font-extrabold uppercase tracking-wide text-ink sm:text-2xl">
             POSTMORTEM
           </p>
           <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">INCIDENT WIRE</p>
-        </div>
+        </motion.div>
 
         {sessionExpired && (
-          <p className="mb-6 border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted">
+          <motion.p
+            variants={feedItemVariants}
+            className="mb-6 border border-alarm-muted px-2.5 py-1.5 text-xs text-alarm-muted"
+          >
             Your session ended. Sign in again to continue.
-          </p>
+          </motion.p>
         )}
 
-        <div className="mb-6 flex border border-rule">
+        <motion.div variants={feedItemVariants} className="mb-6 flex border border-rule">
           <button
             type="button"
             onClick={() => setMode("signin")}
@@ -97,9 +103,9 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
           >
             REGISTER
           </button>
-        </div>
+        </motion.div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <motion.form variants={feedItemVariants} onSubmit={handleSubmit} className="flex flex-col gap-4">
           {mode === "register" && (
             <div className="flex gap-3">
               <TextField
@@ -174,8 +180,9 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenP
                   ? "SIGN IN"
                   : "CREATE ACCOUNT"}
           </button>
-        </form>
-      </div>
+        </motion.form>
+      </motion.div>
     </div>
+    </MotionConfig>
   );
 }

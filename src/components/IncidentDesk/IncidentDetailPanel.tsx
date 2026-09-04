@@ -142,7 +142,7 @@ export function IncidentDetailPanel({
           )}
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 border-t border-rule px-5 py-4">
+        <div className="flex flex-col gap-2 border-t border-rule px-5 py-4">
           <h3 className="text-xs font-semibold tracking-[0.15em] text-ink-dim">AUDIT TRAIL</h3>
           <AuditTrailFeed entries={auditTrail} />
         </div>

@@ -92,10 +92,10 @@ export function IncidentDetailPanel({
 
   return (
     <aside
-      role="dialog"
+      role="region"
       aria-labelledby={titleId}
       inert={!isOpen}
-      className={`fixed inset-x-0 bottom-0 top-auto z-40 flex max-h-[85vh] w-full flex-col border-t border-rule bg-paper-raised transition-transform duration-300 sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:top-0 sm:max-h-none sm:w-full sm:max-w-md sm:border-l sm:border-t-0 md:max-w-lg ${
+      className={`fixed inset-x-0 bottom-0 top-auto z-40 flex max-h-[85vh] w-full flex-col border-t border-rule bg-paper-raised transition-transform duration-300 sm:inset-x-auto sm:bottom-0 sm:right-0 sm:top-[106px] sm:max-h-none sm:w-full sm:max-w-md sm:border-l sm:border-t-0 md:max-w-lg ${
         isOpen ? "translate-y-0 sm:translate-x-0" : "translate-y-full sm:translate-y-0 sm:translate-x-full"
       }`}
     >
@@ -112,7 +112,7 @@ export function IncidentDetailPanel({
               type="button"
               onClick={onClose}
               aria-label="Close incident detail"
-              className="text-xs font-semibold tracking-[0.1em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
+              className="inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.1em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
             >
               CLOSE
             </button>

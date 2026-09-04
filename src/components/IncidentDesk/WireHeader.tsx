@@ -11,7 +11,7 @@ export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
   const now = useClock();
 
   return (
-    <header className="border-b-4 border-double border-steel px-5 py-4 sm:px-8">
+    <header className="sticky top-0 z-50 border-b-4 border-double border-steel bg-paper px-5 py-4 sm:px-8">
       <div className="mx-auto flex max-w-4xl items-end justify-between gap-4">
         <div>
           <p className="font-wire text-2xl font-bold tracking-tight text-ink sm:text-3xl">
@@ -27,7 +27,7 @@ export function WireHeader({ currentUser, onCycleRole }: WireHeaderProps) {
             type="button"
             onClick={onCycleRole}
             aria-label={`Viewing as ${currentUser.name}, role ${currentUser.role}. Click to switch role (demo control).`}
-            className="text-xs font-semibold tracking-[0.06em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
+            className="inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.06em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
           >
             {currentUser.name} · {currentUser.role.toUpperCase()}
           </button>

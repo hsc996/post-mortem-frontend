@@ -182,7 +182,7 @@ export function IncidentDesk() {
       id: createId("audit"),
       incidentId: id,
       action: "INCIDENT_RESOLVED",
-      actorName: live.assigneeName ?? live.reporterName,
+      actorName: currentUser.name,
       occurredAt: resolvedAt,
       detail: "Marked resolved",
     });

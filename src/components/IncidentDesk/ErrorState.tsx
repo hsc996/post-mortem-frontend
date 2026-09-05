@@ -1,3 +1,6 @@
+import { motion } from "motion/react";
+import { feedItemVariants } from "../../lib/motionVariants";
+
 interface ErrorStateProps {
   message: string;
   onRetry: () => void;
@@ -5,7 +8,13 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-5 py-20 text-center sm:px-8" role="alert">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={feedItemVariants}
+      className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-5 py-20 text-center sm:px-8"
+      role="alert"
+    >
       <div>
         <p className="text-lg font-bold tracking-[0.08em] text-alarm-muted">WIRE DOWN</p>
         <p className="mt-1 text-sm text-ink-dim">{message}</p>
@@ -17,6 +26,6 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       >
         RECONNECT
       </button>
-    </div>
+    </motion.div>
   );
 }

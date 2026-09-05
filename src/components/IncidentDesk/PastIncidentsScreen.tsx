@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
+import { motion } from "motion/react";
 import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
+import { feedContainerVariants } from "../../lib/motionVariants";
 import { IncidentBulletin } from "./IncidentBulletin";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
 
@@ -108,16 +110,18 @@ export function PastIncidentsScreen({
         {resolvedIncidents.length === 0 ? (
           <p className="mx-auto max-w-4xl px-5 py-6 text-sm text-ink-dim sm:px-8">No resolved incidents yet.</p>
         ) : (
-          resolvedIncidents.map((incident) => (
-            <IncidentBulletin
-              key={incident.id}
-              incident={incident}
-              now={now}
-              canAct={canAct}
-              onClaim={() => {}}
-              onSelect={handleSelect}
-            />
-          ))
+          <motion.div initial="hidden" animate="show" variants={feedContainerVariants}>
+            {resolvedIncidents.map((incident) => (
+              <IncidentBulletin
+                key={incident.id}
+                incident={incident}
+                now={now}
+                canAct={canAct}
+                onClaim={() => {}}
+                onSelect={handleSelect}
+              />
+            ))}
+          </motion.div>
         )}
 
         <div className="mx-auto flex max-w-4xl items-center justify-center gap-4 px-5 py-6 sm:px-8">

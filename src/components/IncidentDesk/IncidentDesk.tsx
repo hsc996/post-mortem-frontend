@@ -8,6 +8,7 @@ import { useIncidents } from "../../hooks/useIncidents";
 import { mitigationClock } from "../../lib/wireFormat";
 import { WireHeader } from "./WireHeader";
 import { IncidentFeed } from "./IncidentFeed";
+import { PastIncidentsScreen } from "./PastIncidentsScreen";
 import { LoadingState, type SkeletonSpec } from "./LoadingState";
 import { ErrorState } from "./ErrorState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
@@ -32,9 +33,9 @@ interface IncidentDeskProps {
   onSignOut: () => void;
 }
 
+/** Active-only (open/mitigated) — resolved incidents live in their own paged history, not this tiered stream. */
 function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   const tier = (incident: Incident) => {
-    if (incident.status === "resolved") return 2;
     if (incident.mitigation && mitigationClock(incident.mitigation.appliedAt, incident.mitigation.ttlMinutes, now).isExpired) {
       return 0;
     }
@@ -44,9 +45,6 @@ function sortIncidents(incidents: Incident[], now: Date): Incident[] {
   return [...incidents].sort((a, b) => {
     const tierDiff = tier(a) - tier(b);
     if (tierDiff !== 0) return tierDiff;
-    if (tier(a) === 2) {
-      return new Date(b.resolvedAt ?? b.createdAt).getTime() - new Date(a.resolvedAt ?? a.createdAt).getTime();
-    }
     const severityDiff = SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity];
     if (severityDiff !== 0) return severityDiff;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -58,6 +56,13 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
   const currentUser = toCurrentUser(authUser);
   const {
     incidents,
+    resolvedIncidents,
+    resolvedPage,
+    resolvedHasMore,
+    resolvedHasPrev,
+    resolvedLoading,
+    goToResolvedPage,
+    users,
     loadError,
     retry,
     auditTrail,
@@ -72,12 +77,13 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [newIncidentOpen, setNewIncidentOpen] = useState(false);
-  const [view, setView] = useState<"desk" | "admin" | "audit">("desk");
+  const [view, setView] = useState<"desk" | "admin" | "audit" | "history">("desk");
   const openerRef = useRef<HTMLElement | null>(null);
 
   const sorted = useMemo(() => (incidents ? sortIncidents(incidents, now) : []), [incidents, now]);
 
-  const findLive = (id: string) => incidents?.find((incident) => incident.id === id);
+  const findLive = (id: string) =>
+    incidents?.find((incident) => incident.id === id) ?? resolvedIncidents.find((incident) => incident.id === id);
 
   const handleClaim = (id: string) => {
     if (!canMutate(currentUser.role)) return;
@@ -131,6 +137,31 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
     );
   }
 
+  if (view === "history") {
+    return (
+      <MotionConfig reducedMotion="user">
+        <PastIncidentsScreen
+          now={now}
+          canAct={acting}
+          resolvedIncidents={resolvedIncidents}
+          resolvedPage={resolvedPage}
+          resolvedHasMore={resolvedHasMore}
+          resolvedHasPrev={resolvedHasPrev}
+          resolvedLoading={resolvedLoading}
+          onPageChange={(direction) => void goToResolvedPage(direction)}
+          auditTrail={auditTrail}
+          loadAuditTrail={loadAuditTrail}
+          onClaim={handlePanelClaim}
+          onResolve={handlePanelResolve}
+          onUnwind={handlePanelUnwind}
+          onApplyMitigation={handlePanelApplyMitigation}
+          onReload={refreshIncident}
+          onBack={() => setView("desk")}
+        />
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-paper">
@@ -159,7 +190,12 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
       )}
 
       {acting && (
-        <NewIncidentPanel isOpen={newIncidentOpen} onClose={() => setNewIncidentOpen(false)} onCreate={createIncident} />
+        <NewIncidentPanel
+          isOpen={newIncidentOpen}
+          users={users}
+          onClose={() => setNewIncidentOpen(false)}
+          onCreate={createIncident}
+        />
       )}
 
       <main
@@ -175,8 +211,15 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           )
         ) : (
           <>
-            {acting && (
-              <div className="mx-auto flex max-w-4xl justify-end px-5 pt-4 sm:px-8">
+            <div className="mx-auto flex max-w-4xl justify-end gap-3 px-5 pb-6 pt-4 sm:px-8">
+              <button
+                type="button"
+                onClick={() => setView("history")}
+                className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+              >
+                VIEW PAST INCIDENTS
+              </button>
+              {acting && (
                 <button
                   type="button"
                   onClick={handleOpenNewIncident}
@@ -184,8 +227,8 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
                 >
                   + FILE INCIDENT
                 </button>
-              </div>
-            )}
+              )}
+            </div>
             <IncidentFeed incidents={sorted} now={now} canAct={acting} onClaim={handleClaim} onSelect={handleSelect} />
           </>
         )}

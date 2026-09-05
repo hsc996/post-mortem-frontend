@@ -3,19 +3,21 @@ import { motion } from "motion/react";
 import type { Severity } from "../../types/incident";
 import type { CreateIncidentResult } from "../../types/panelAction";
 import type { IncidentCreateInput } from "../../lib/incidentsApi";
+import type { DirectoryEntry } from "../../hooks/useIncidents";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
 
 const SEVERITIES: Severity[] = ["critical", "high", "medium", "low"];
 
 interface NewIncidentPanelProps {
   isOpen: boolean;
+  users: DirectoryEntry[];
   onClose: () => void;
   onCreate: (input: IncidentCreateInput) => Promise<CreateIncidentResult>;
 }
 
-const EMPTY = { title: "", description: "", serviceName: "", severity: "medium" as Severity };
+const EMPTY = { title: "", description: "", serviceName: "", severity: "medium" as Severity, assigneeId: "" };
 
-export function NewIncidentPanel({ isOpen, onClose, onCreate }: NewIncidentPanelProps) {
+export function NewIncidentPanel({ isOpen, users, onClose, onCreate }: NewIncidentPanelProps) {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [form, setForm] = useState(EMPTY);
@@ -26,7 +28,7 @@ export function NewIncidentPanel({ isOpen, onClose, onCreate }: NewIncidentPanel
     e.preventDefault();
     setPending(true);
     setError(null);
-    const result = await onCreate(form);
+    const result = await onCreate({ ...form, assigneeId: form.assigneeId || undefined });
     setPending(false);
     if (!result.ok) {
       setError(result.reason);
@@ -127,6 +129,25 @@ export function NewIncidentPanel({ isOpen, onClose, onCreate }: NewIncidentPanel
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="new-incident-assignee" className="text-xs font-semibold tracking-[0.1em] text-ink-dim">
+              ASSIGN TO
+            </label>
+            <select
+              id="new-incident-assignee"
+              value={form.assigneeId}
+              onChange={(e) => setForm((f) => ({ ...f, assigneeId: e.target.value }))}
+              className="min-h-11 w-full border border-rule bg-transparent px-3 text-sm text-ink"
+            >
+              <option value="">UNASSIGNED</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-1.5">

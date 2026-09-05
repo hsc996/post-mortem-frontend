@@ -12,14 +12,43 @@ function toActionResult(err: unknown): PanelActionResult {
   return { ok: false, kind: "blocked", reason: err instanceof Error ? err.message : "Request failed." };
 }
 
+export interface DirectoryEntry {
+  id: string;
+  name: string;
+}
+
 /**
- * Owns the real backend's incident data: the list, per-incident mitigation
- * joins, on-demand audit trails, and the three mutating actions (claim,
- * resolve, unwind clear) — each translated into the same ok/conflict/blocked
+ * Active (open/mitigated) incidents are the small, in-flight queue the
+ * urgency-tiered sort exists for — fetched in full, not paginated, since a
+ * real incident-response tool shouldn't have hundreds open simultaneously.
+ * Resolved incidents are historical browsing, not triage, so they get real
+ * paged navigation instead.
+ */
+const RESOLVED_PAGE_SIZE = 10;
+
+async function mapIncidentDtos(token: string, dtos: api.IncidentDto[], userMap: UserMap): Promise<Incident[]> {
+  return Promise.all(
+    dtos.map(async (dto) => {
+      const mitigationDto = dto.status === "mitigated" ? await api.getMitigation(token, dto.id) : null;
+      const mitigation = mitigationDto ? mapMitigation(mitigationDto, userMap) : null;
+      return mapIncident(dto, userMap, mitigation);
+    }),
+  );
+}
+
+/**
+ * Owns the real backend's incident data: the active queue, per-incident
+ * mitigation joins, on-demand audit trails, paged resolved-incident history,
+ * and the mutating actions — each translated into the same ok/conflict/blocked
  * contract the detail panel already understood from its mock-data design.
  */
 export function useIncidents(token: string) {
   const [incidents, setIncidents] = useState<Incident[] | null>(null);
+  const [resolvedIncidents, setResolvedIncidents] = useState<Incident[]>([]);
+  const [resolvedSkip, setResolvedSkip] = useState(0);
+  const [resolvedHasMore, setResolvedHasMore] = useState(false);
+  const [resolvedLoading, setResolvedLoading] = useState(false);
+  const [users, setUsers] = useState<DirectoryEntry[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [auditTrail, setAuditTrail] = useState<Record<string, AuditEntry[]>>({});
@@ -29,19 +58,25 @@ export function useIncidents(token: string) {
     let cancelled = false;
     (async () => {
       try {
-        const [userDtos, incidentDtos] = await Promise.all([api.listUsers(token), api.listIncidents(token)]);
+        const [userDtos, openDtos, mitigatedDtos, resolvedDtos] = await Promise.all([
+          api.listUsers(token),
+          api.listIncidents(token, { status: "open", limit: 100 }),
+          api.listIncidents(token, { status: "mitigated", limit: 100 }),
+          api.listIncidents(token, { status: "resolved", skip: 0, limit: RESOLVED_PAGE_SIZE }),
+        ]);
         if (cancelled) return;
         const userMap = buildUserMap(userDtos);
         userMapRef.current = userMap;
-        const mapped = await Promise.all(
-          incidentDtos.map(async (dto) => {
-            const mitigationDto = dto.status === "mitigated" ? await api.getMitigation(token, dto.id) : null;
-            const mitigation = mitigationDto ? mapMitigation(mitigationDto, userMap) : null;
-            return mapIncident(dto, userMap, mitigation);
-          }),
-        );
+        setUsers(userDtos.map((u) => ({ id: u.id, name: userMap.get(u.id) ?? "UNKNOWN" })));
+        const [activeMapped, resolvedMapped] = await Promise.all([
+          mapIncidentDtos(token, [...openDtos, ...mitigatedDtos], userMap),
+          mapIncidentDtos(token, resolvedDtos, userMap),
+        ]);
         if (cancelled) return;
-        setIncidents(mapped);
+        setIncidents(activeMapped);
+        setResolvedIncidents(resolvedMapped);
+        setResolvedSkip(0);
+        setResolvedHasMore(resolvedDtos.length === RESOLVED_PAGE_SIZE);
       } catch (err) {
         if (cancelled) return;
         setLoadError(err instanceof Error ? err.message : "Failed to load incidents.");
@@ -57,9 +92,45 @@ export function useIncidents(token: string) {
     setLoadAttempt((n) => n + 1);
   }, []);
 
+  const goToResolvedPage = useCallback(
+    async (direction: "next" | "prev") => {
+      if (resolvedLoading) return;
+      if (direction === "next" && !resolvedHasMore) return;
+      if (direction === "prev" && resolvedSkip === 0) return;
+      const newSkip = direction === "next" ? resolvedSkip + RESOLVED_PAGE_SIZE : resolvedSkip - RESOLVED_PAGE_SIZE;
+      setResolvedLoading(true);
+      try {
+        const dtos = await api.listIncidents(token, { status: "resolved", skip: newSkip, limit: RESOLVED_PAGE_SIZE });
+        const mapped = await mapIncidentDtos(token, dtos, userMapRef.current);
+        setResolvedIncidents(mapped);
+        setResolvedSkip(newSkip);
+        setResolvedHasMore(dtos.length === RESOLVED_PAGE_SIZE);
+      } catch {
+        // Leave pagination state as-is — a transient failure shouldn't strand the view.
+      } finally {
+        setResolvedLoading(false);
+      }
+    },
+    [token, resolvedSkip, resolvedHasMore, resolvedLoading],
+  );
+
   const patchIncident = useCallback((updated: Incident) => {
     setIncidents((current) => (current ? current.map((inc) => (inc.id === updated.id ? updated : inc)) : current));
   }, []);
+
+  /** A resolve moves an incident out of the active queue — only reflect it in the currently-viewed resolved page when that's page one, so a background resolve elsewhere doesn't corrupt whatever page the user is actually looking at. */
+  const moveToResolved = useCallback(
+    (updated: Incident) => {
+      setIncidents((current) => (current ? current.filter((inc) => inc.id !== updated.id) : current));
+      setResolvedSkip((skip) => {
+        if (skip === 0) {
+          setResolvedIncidents((current) => [updated, ...current].slice(0, RESOLVED_PAGE_SIZE));
+        }
+        return skip;
+      });
+    },
+    [],
+  );
 
   const loadAuditTrail = useCallback(
     async (incidentId: string) => {
@@ -95,14 +166,14 @@ export function useIncidents(token: string) {
       try {
         const dto = await api.resolveIncident(token, id);
         const updated = mapIncident(dto, userMapRef.current, null);
-        patchIncident(updated);
+        moveToResolved(updated);
         void loadAuditTrail(id);
         return { ok: true, incident: updated };
       } catch (err) {
         return toActionResult(err);
       }
     },
-    [token, patchIncident, loadAuditTrail],
+    [token, moveToResolved, loadAuditTrail],
   );
 
   /**
@@ -117,13 +188,17 @@ export function useIncidents(token: string) {
         const mitigationDto = dto.status === "mitigated" ? await api.getMitigation(token, id) : null;
         const mitigation = mitigationDto ? mapMitigation(mitigationDto, userMapRef.current) : null;
         const updated = mapIncident(dto, userMapRef.current, mitigation);
-        patchIncident(updated);
+        if (dto.status === "resolved") {
+          moveToResolved(updated);
+        } else {
+          patchIncident(updated);
+        }
         return updated;
       } catch {
         return null;
       }
     },
-    [token, patchIncident],
+    [token, patchIncident, moveToResolved],
   );
 
   const createIncident = useCallback(
@@ -175,6 +250,13 @@ export function useIncidents(token: string) {
 
   return {
     incidents,
+    resolvedIncidents,
+    resolvedPage: resolvedSkip / RESOLVED_PAGE_SIZE + 1,
+    resolvedHasMore,
+    resolvedHasPrev: resolvedSkip > 0,
+    resolvedLoading,
+    goToResolvedPage,
+    users,
     loadError,
     retry,
     auditTrail,

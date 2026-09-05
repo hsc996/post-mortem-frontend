@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "./apiClient";
-import { claimIncident, ConflictError, createMitigation, getMitigation, resolveIncident } from "./incidentsApi";
+import { claimIncident, ConflictError, createIncident, createMitigation, getMitigation, resolveIncident } from "./incidentsApi";
 
 function fakeResponse(status: number, body: unknown): Response {
   return {
@@ -80,5 +80,50 @@ describe("incidentsApi conflict parsing", () => {
       }),
     );
     expect(result.ttl_minutes).toBe(90);
+  });
+
+  const fakeIncidentDto = {
+    id: "i1",
+    title: "Checkout failing",
+    description: "desc",
+    service_name: "payments-api",
+    severity: "critical",
+    status: "open",
+    version: 1,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+    resolved_at: null,
+    mttr_seconds: null,
+    reporter_id: "u1",
+    assignee_id: null,
+  };
+
+  it("createIncident omits assignee_id from the body when not provided", async () => {
+    const authFetch = vi.spyOn(apiClient, "authFetch").mockResolvedValue(fakeResponse(201, fakeIncidentDto));
+
+    await createIncident("tok", {
+      title: "Checkout failing",
+      description: "desc",
+      serviceName: "payments-api",
+      severity: "critical",
+    });
+
+    const body = JSON.parse((authFetch.mock.calls[0][2] as RequestInit).body as string);
+    expect(body).not.toHaveProperty("assignee_id");
+  });
+
+  it("createIncident includes assignee_id in the body when provided", async () => {
+    const authFetch = vi.spyOn(apiClient, "authFetch").mockResolvedValue(fakeResponse(201, fakeIncidentDto));
+
+    await createIncident("tok", {
+      title: "Checkout failing",
+      description: "desc",
+      serviceName: "payments-api",
+      severity: "critical",
+      assigneeId: "u2",
+    });
+
+    const body = JSON.parse((authFetch.mock.calls[0][2] as RequestInit).body as string);
+    expect(body.assignee_id).toBe("u2");
   });
 });

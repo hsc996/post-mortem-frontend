@@ -82,8 +82,18 @@ async function handle<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function listIncidents(token: string): Promise<IncidentDto[]> {
-  return handle<IncidentDto[]>(await authFetch(token, "/incidents/?limit=100"));
+export interface ListIncidentsParams {
+  status?: Status;
+  skip?: number;
+  limit?: number;
+}
+
+export async function listIncidents(token: string, params: ListIncidentsParams = {}): Promise<IncidentDto[]> {
+  const q = new URLSearchParams();
+  if (params.status) q.set("status", params.status);
+  q.set("skip", String(params.skip ?? 0));
+  q.set("limit", String(params.limit ?? 100));
+  return handle<IncidentDto[]>(await authFetch(token, `/incidents/?${q.toString()}`));
 }
 
 export async function getIncident(token: string, incidentId: string): Promise<IncidentDto> {
@@ -99,6 +109,7 @@ export interface IncidentCreateInput {
   description: string;
   serviceName: string;
   severity: Severity;
+  assigneeId?: string;
 }
 
 export async function createIncident(token: string, input: IncidentCreateInput): Promise<IncidentDto> {
@@ -111,6 +122,7 @@ export async function createIncident(token: string, input: IncidentCreateInput):
         description: input.description,
         service_name: input.serviceName,
         severity: input.severity,
+        ...(input.assigneeId ? { assignee_id: input.assigneeId } : {}),
       }),
     }),
   );

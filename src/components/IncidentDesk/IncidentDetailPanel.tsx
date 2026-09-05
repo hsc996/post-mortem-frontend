@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { motion } from "motion/react";
 import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
+import type { IncidentEditInput } from "../../lib/incidentsApi";
 import { useClock } from "../../hooks/useClock";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
 import { PrecedenceStamp } from "./PrecedenceStamp";
@@ -9,6 +10,7 @@ import { StatusTag } from "./StatusTag";
 import { MitigationReadout } from "./MitigationReadout";
 import { PanelActionRow } from "./PanelActionRow";
 import { MitigationCreateForm } from "./MitigationCreateForm";
+import { EditIncidentForm } from "./EditIncidentForm";
 import { ConflictNotice } from "./ConflictNotice";
 import { AuditTrailFeed } from "./AuditTrailFeed";
 
@@ -22,6 +24,7 @@ interface IncidentDetailPanelProps {
   onResolve: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onUnwind: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onApplyMitigation: (id: string, summary: string, ttlMinutes: number) => Promise<PanelActionResult>;
+  onEdit: (id: string, expectedVersion: number, input: IncidentEditInput) => Promise<PanelActionResult>;
   onReload: (id: string) => Promise<Incident | null>;
 }
 
@@ -42,6 +45,7 @@ export function IncidentDetailPanel({
   onResolve,
   onUnwind,
   onApplyMitigation,
+  onEdit,
   onReload,
 }: IncidentDetailPanelProps) {
   const now = useClock();
@@ -56,6 +60,7 @@ export function IncidentDetailPanel({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [showMitigationForm, setShowMitigationForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     if (isOpen) closeButtonRef.current?.focus();
@@ -100,6 +105,17 @@ export function IncidentDetailPanel({
     [snapshot.id, onApplyMitigation, settle],
   );
 
+  const dispatchEdit = useCallback(
+    async (input: IncidentEditInput) => {
+      setPending(true);
+      const result = await onEdit(snapshot.id, snapshot.version, input);
+      setPending(false);
+      settle(result, "Incident updated.");
+      if (result.ok) setShowEditForm(false);
+    },
+    [snapshot.id, snapshot.version, onEdit, settle],
+  );
+
   const [reloading, setReloading] = useState(false);
 
   const handleReload = async () => {
@@ -120,6 +136,9 @@ export function IncidentDetailPanel({
         if (showMitigationForm) {
           setShowMitigationForm(false);
           setBlockedReason(null);
+        } else if (showEditForm) {
+          setShowEditForm(false);
+          setBlockedReason(null);
         } else {
           onClose();
         }
@@ -128,7 +147,7 @@ export function IncidentDetailPanel({
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const isResolved = snapshot.status === "resolved";
       const key = e.key.toLowerCase();
-      if (pending || showMitigationForm) return;
+      if (pending || showMitigationForm || showEditForm) return;
       if (key === "c" && canAct && !isResolved && !snapshot.assigneeName) {
         e.preventDefault();
         void dispatch(onClaim, "Claimed.");
@@ -141,11 +160,14 @@ export function IncidentDetailPanel({
       } else if (key === "m" && canAct && !isResolved && !snapshot.mitigation) {
         e.preventDefault();
         setShowMitigationForm(true);
+      } else if (key === "e" && canAct && !conflict) {
+        e.preventDefault();
+        setShowEditForm(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind, pending, showMitigationForm]);
+  }, [isOpen, onClose, canAct, conflict, snapshot, dispatch, onClaim, onResolve, onUnwind, pending, showMitigationForm, showEditForm]);
 
   return (
     <aside
@@ -185,12 +207,27 @@ export function IncidentDetailPanel({
         </motion.div>
 
         <motion.div variants={feedItemVariants} className="flex flex-col gap-4 px-5 py-4">
-          <h2 id={titleId} className="font-title text-xl font-semibold text-ink">
-            {snapshot.title}
-          </h2>
-          <p className="text-sm text-ink-dim">{snapshot.description}</p>
+          {!showEditForm && (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <h2 id={titleId} className="font-title text-xl font-semibold text-ink">
+                  {snapshot.title}
+                </h2>
+                {canAct && !conflict && !showMitigationForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowEditForm(true)}
+                    className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold tracking-[0.1em] text-ink-dim transition-colors hover:text-ink focus-visible:text-ink"
+                  >
+                    EDIT
+                  </button>
+                )}
+              </div>
+              <p className="text-sm text-ink-dim">{snapshot.description}</p>
+            </>
+          )}
 
-          {snapshot.mitigation && <MitigationReadout mitigation={snapshot.mitigation} now={now} />}
+          {snapshot.mitigation && !showEditForm && <MitigationReadout mitigation={snapshot.mitigation} now={now} />}
 
           {conflict ? (
             <ConflictNotice
@@ -198,6 +235,22 @@ export function IncidentDetailPanel({
               current={conflict.current}
               onReload={() => void handleReload()}
               reloading={reloading}
+            />
+          ) : showEditForm ? (
+            <EditIncidentForm
+              initial={{
+                title: snapshot.title,
+                description: snapshot.description,
+                serviceName: snapshot.serviceName,
+                severity: snapshot.severity,
+              }}
+              pending={pending}
+              blockedReason={blockedReason}
+              onSubmit={(input) => void dispatchEdit(input)}
+              onCancel={() => {
+                setShowEditForm(false);
+                setBlockedReason(null);
+              }}
             />
           ) : showMitigationForm ? (
             <MitigationCreateForm

@@ -118,6 +118,13 @@ export function useIncidents(token: string) {
     setIncidents((current) => (current ? current.map((inc) => (inc.id === updated.id ? updated : inc)) : current));
   }, []);
 
+  /** Edits never change status, so the updated incident could be sitting in either
+   * list — patch whichever one actually has it; mapping over the other is a no-op. */
+  const patchAny = useCallback((updated: Incident) => {
+    setIncidents((current) => (current ? current.map((inc) => (inc.id === updated.id ? updated : inc)) : current));
+    setResolvedIncidents((current) => current.map((inc) => (inc.id === updated.id ? updated : inc)));
+  }, []);
+
   /** A resolve moves an incident out of the active queue — only reflect it in the currently-viewed resolved page when that's page one, so a background resolve elsewhere doesn't corrupt whatever page the user is actually looking at. */
   const moveToResolved = useCallback(
     (updated: Incident) => {
@@ -232,6 +239,25 @@ export function useIncidents(token: string) {
     [token, patchIncident, loadAuditTrail],
   );
 
+  const edit = useCallback(
+    async (id: string, expectedVersion: number, input: api.IncidentEditInput): Promise<PanelActionResult> => {
+      try {
+        const dto = await api.editIncident(token, id, input, expectedVersion);
+        const existingMitigation =
+          incidents?.find((i) => i.id === id)?.mitigation ??
+          resolvedIncidents.find((i) => i.id === id)?.mitigation ??
+          null;
+        const updated = mapIncident(dto, userMapRef.current, existingMitigation);
+        patchAny(updated);
+        void loadAuditTrail(id);
+        return { ok: true, incident: updated };
+      } catch (err) {
+        return toActionResult(err);
+      }
+    },
+    [token, incidents, resolvedIncidents, patchAny, loadAuditTrail],
+  );
+
   const unwind = useCallback(
     async (id: string): Promise<PanelActionResult> => {
       try {
@@ -267,5 +293,6 @@ export function useIncidents(token: string) {
     refreshIncident,
     createIncident,
     applyMitigation,
+    edit,
   };
 }

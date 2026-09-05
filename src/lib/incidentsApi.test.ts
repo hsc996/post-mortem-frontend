@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "./apiClient";
-import { claimIncident, ConflictError, createIncident, createMitigation, getMitigation, resolveIncident } from "./incidentsApi";
+import {
+  claimIncident,
+  ConflictError,
+  createIncident,
+  createMitigation,
+  editIncident,
+  getMitigation,
+  resolveIncident,
+} from "./incidentsApi";
 
 function fakeResponse(status: number, body: unknown): Response {
   return {
@@ -80,6 +88,37 @@ describe("incidentsApi conflict parsing", () => {
       }),
     );
     expect(result.ttl_minutes).toBe(90);
+  });
+
+  it("editIncident PATCHes only the changed fields plus version, in snake_case", async () => {
+    const authFetch = vi.spyOn(apiClient, "authFetch").mockResolvedValue(
+      fakeResponse(200, {
+        id: "i1",
+        title: "Checkout down entirely",
+        description: "desc",
+        service_name: "payments-api",
+        severity: "critical",
+        status: "open",
+        version: 2,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+        resolved_at: null,
+        mttr_seconds: null,
+        reporter_id: "u1",
+        assignee_id: null,
+      }),
+    );
+
+    await editIncident("tok", "i1", { title: "Checkout down entirely" }, 1);
+
+    expect(authFetch).toHaveBeenCalledWith(
+      "tok",
+      "/incidents/i1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ title: "Checkout down entirely", version: 1 }),
+      }),
+    );
   });
 
   const fakeIncidentDto = {

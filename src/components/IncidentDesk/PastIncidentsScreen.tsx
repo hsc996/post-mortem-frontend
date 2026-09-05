@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
+import type { IncidentEditInput } from "../../lib/incidentsApi";
 import { feedContainerVariants } from "../../lib/motionVariants";
 import { IncidentBulletin } from "./IncidentBulletin";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
@@ -21,6 +22,7 @@ interface PastIncidentsScreenProps {
   onResolve: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onUnwind: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onApplyMitigation: (id: string, summary: string, ttlMinutes: number) => Promise<PanelActionResult>;
+  onEdit: (id: string, expectedVersion: number, input: IncidentEditInput) => Promise<PanelActionResult>;
   onReload: (id: string) => Promise<Incident | null>;
   onBack: () => void;
 }
@@ -47,6 +49,7 @@ export function PastIncidentsScreen({
   onResolve,
   onUnwind,
   onApplyMitigation,
+  onEdit,
   onReload,
   onBack,
 }: PastIncidentsScreenProps) {
@@ -102,6 +105,7 @@ export function PastIncidentsScreen({
           onResolve={onResolve}
           onUnwind={onUnwind}
           onApplyMitigation={onApplyMitigation}
+          onEdit={onEdit}
           onReload={onReload}
         />
       )}

@@ -14,6 +14,7 @@ vi.mock("../lib/incidentsApi", async (importOriginal) => {
     getMitigation: vi.fn(),
     getIncident: vi.fn(),
     claimIncident: vi.fn(),
+    editIncident: vi.fn(),
     resolveIncident: vi.fn(),
     clearMitigation: vi.fn(),
     createMitigation: vi.fn(),
@@ -171,6 +172,37 @@ describe("useIncidents", () => {
     });
 
     expect(outcome).toMatchObject({ ok: false, kind: "blocked" });
+  });
+
+  it("edit: on success, patches the incident in place and returns ok", async () => {
+    vi.mocked(api.editIncident).mockResolvedValue({ ...openIncident, title: "Checkout down entirely", version: 2 });
+    const { result } = renderHook(() => useIncidents("tok"));
+    await waitFor(() => expect(result.current.incidents).not.toBeNull());
+
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.edit("i1", 1, { title: "Checkout down entirely" });
+    });
+
+    expect(outcome).toMatchObject({ ok: true });
+    expect(result.current.incidents![0].title).toBe("Checkout down entirely");
+    expect(result.current.incidents![0].version).toBe(2);
+  });
+
+  it("edit: on a real 409, returns a conflict result and never mutates local state", async () => {
+    vi.mocked(api.editIncident).mockRejectedValue(
+      new ConflictError("Conflict: ... Expected version 1, but current version is 3.", 1, 3),
+    );
+    const { result } = renderHook(() => useIncidents("tok"));
+    await waitFor(() => expect(result.current.incidents).not.toBeNull());
+
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.edit("i1", 1, { title: "Checkout down entirely" });
+    });
+
+    expect(outcome).toEqual({ ok: false, kind: "conflict", expected: 1, current: 3 });
+    expect(result.current.incidents![0].title).toBe("Checkout failing");
   });
 
   it("goToResolvedPage: fetches the next page with the correct skip and reflects it in state", async () => {

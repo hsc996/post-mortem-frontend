@@ -177,6 +177,34 @@ export async function claimIncident(
   );
 }
 
+export interface IncidentEditInput {
+  title?: string;
+  description?: string;
+  serviceName?: string;
+  severity?: Severity;
+}
+
+export async function editIncident(
+  token: string,
+  incidentId: string,
+  input: IncidentEditInput,
+  version: number,
+): Promise<IncidentDto> {
+  return handle<IncidentDto>(
+    await authFetch(token, `/incidents/${incidentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...(input.title !== undefined ? { title: input.title } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.serviceName !== undefined ? { service_name: input.serviceName } : {}),
+        ...(input.severity !== undefined ? { severity: input.severity } : {}),
+        version,
+      }),
+    }),
+  );
+}
+
 export async function resolveIncident(token: string, incidentId: string): Promise<IncidentDto> {
   return handle<IncidentDto>(await authFetch(token, `/incidents/${incidentId}/resolve`, { method: "POST" }));
 }

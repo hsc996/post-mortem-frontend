@@ -73,6 +73,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
     refreshIncident,
     createIncident,
     applyMitigation,
+    edit,
   } = useIncidents(token);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -155,6 +156,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           onResolve={handlePanelResolve}
           onUnwind={handlePanelUnwind}
           onApplyMitigation={handlePanelApplyMitigation}
+          onEdit={edit}
           onReload={refreshIncident}
           onBack={() => setView("desk")}
         />
@@ -185,6 +187,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           onResolve={handlePanelResolve}
           onUnwind={handlePanelUnwind}
           onApplyMitigation={handlePanelApplyMitigation}
+          onEdit={edit}
           onReload={refreshIncident}
         />
       )}

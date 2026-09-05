@@ -38,32 +38,6 @@ export async function login(email: string, password: string): Promise<string> {
   return data.access_token;
 }
 
-export interface RegisterInput {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
-
-export async function register(input: RegisterInput): Promise<void> {
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: input.email,
-        password: input.password,
-        first_name: input.firstName,
-        last_name: input.lastName,
-      }),
-    });
-  } catch {
-    throw new ApiError("Can't reach the backend. Is it running?", 0);
-  }
-  if (!response.ok) await parseError(response);
-}
-
 export async function fetchMe(token: string): Promise<AuthUser> {
   const response = await authFetch(token, "/auth/me");
   if (!response.ok) await parseError(response);

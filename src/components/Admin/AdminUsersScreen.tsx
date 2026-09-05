@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useUsers } from "../../hooks/useUsers";
+import { useInvites } from "../../hooks/useInvites";
 import type { Role } from "../../types/user";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
+import { InviteUserPanel } from "./InviteUserPanel";
 
 const ROLES: Role[] = ["admin", "responder", "viewer"];
 
@@ -12,10 +14,18 @@ interface AdminUsersScreenProps {
   onBack: () => void;
 }
 
+function inviteStatus(invite: { isAccepted: boolean; isExpired: boolean }): { label: string; className: string } {
+  if (invite.isAccepted) return { label: "ACCEPTED", className: "text-nominal" };
+  if (invite.isExpired) return { label: "EXPIRED", className: "text-alarm-muted" };
+  return { label: "PENDING", className: "text-ink-dim" };
+}
+
 export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScreenProps) {
   const { users, loadError, reload, updateRole } = useUsers(token);
+  const { invites, sendInvite } = useInvites(token);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [rowError, setRowError] = useState<{ id: string; reason: string } | null>(null);
+  const [invitePanelOpen, setInvitePanelOpen] = useState(false);
 
   const handleRoleChange = async (userId: string, role: Role) => {
     setPendingId(userId);
@@ -35,17 +45,32 @@ export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScr
             </p>
             <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">ADMIN — ROLE MANAGEMENT</p>
           </div>
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
-          >
-            BACK TO WIRE
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setInvitePanelOpen(true)}
+              className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+            >
+              + INVITE USER
+            </button>
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+            >
+              BACK TO WIRE
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-5 py-6 sm:px-8">
+      <InviteUserPanel isOpen={invitePanelOpen} onClose={() => setInvitePanelOpen(false)} onSend={sendInvite} />
+
+      <main
+        className={`mx-auto max-w-4xl px-5 py-6 transition-[padding] duration-300 sm:px-8 ${
+          invitePanelOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""
+        }`}
+      >
         {loadError && (
           <div className="mb-4 flex items-center justify-between gap-3 border border-alarm-muted px-2.5 py-1.5">
             <p className="text-xs text-alarm-muted">{loadError}</p>
@@ -107,6 +132,34 @@ export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScr
               </motion.li>
             ))}
           </motion.ul>
+        )}
+
+        {invites && invites.filter((invite) => !invite.isAccepted).length > 0 && (
+          <>
+            <p className="mb-3 mt-8 text-xs font-semibold tracking-[0.15em] text-ink-dim">PENDING INVITES</p>
+            <motion.ul initial="hidden" animate="show" variants={feedContainerVariants} className="flex flex-col">
+              {invites
+                .filter((invite) => !invite.isAccepted)
+                .map((invite) => {
+                  const status = inviteStatus(invite);
+                  return (
+                    <motion.li
+                      key={invite.id}
+                      variants={feedItemVariants}
+                      className="flex items-center justify-between gap-3 border-b border-rule py-3"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm text-ink">{invite.email}</span>
+                        <span className="text-xs text-ink-dim">{invite.role.toUpperCase()}</span>
+                      </div>
+                      <span className={`text-xs font-semibold tracking-[0.08em] ${status.className}`}>
+                        {status.label}
+                      </span>
+                    </motion.li>
+                  );
+                })}
+            </motion.ul>
+          </>
         )}
       </main>
     </div>

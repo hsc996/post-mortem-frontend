@@ -49,8 +49,8 @@ export function useAuth() {
     };
   }, [token]);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const newToken = await authApi.login(email, password);
+  /** Shared by a normal login and the invite-accept flow, which already has a fresh access token in hand. */
+  const signInWithToken = useCallback(async (newToken: string) => {
     const fetchedUser = await authApi.fetchMe(newToken);
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
@@ -59,12 +59,12 @@ export function useAuth() {
     setStatus("authenticated");
   }, []);
 
-  const signUp = useCallback(
-    async (input: authApi.RegisterInput) => {
-      await authApi.register(input);
-      await signIn(input.email, input.password);
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      const newToken = await authApi.login(email, password);
+      await signInWithToken(newToken);
     },
-    [signIn],
+    [signInWithToken],
   );
 
   const signOut = useCallback(async () => {
@@ -76,5 +76,5 @@ export function useAuth() {
     setStatus("unauthenticated");
   }, [token]);
 
-  return { status, user, token, sessionExpired, signIn, signUp, signOut };
+  return { status, user, token, sessionExpired, signIn, signInWithToken, signOut };
 }

@@ -66,11 +66,7 @@ export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScr
 
       <InviteUserPanel isOpen={invitePanelOpen} onClose={() => setInvitePanelOpen(false)} onSend={sendInvite} />
 
-      <main
-        className={`mx-auto max-w-4xl px-5 py-6 transition-[padding] duration-300 sm:px-8 ${
-          invitePanelOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""
-        }`}
-      >
+      <main className="mx-auto max-w-4xl px-5 py-6 sm:px-8">
         {loadError && (
           <div className="mb-4 flex items-center justify-between gap-3 border border-alarm-muted px-2.5 py-1.5">
             <p className="text-xs text-alarm-muted">{loadError}</p>

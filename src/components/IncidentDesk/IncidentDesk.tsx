@@ -202,9 +202,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
       )}
 
       <main
-        className={`transition-[padding] duration-300 ${
-          panelOpen || newIncidentOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""
-        }`}
+        className={`transition-[padding] duration-300 ${panelOpen ? "sm:pr-[28rem] md:pr-[32rem]" : ""}`}
       >
         {incidents === null ? (
           loadError ? (

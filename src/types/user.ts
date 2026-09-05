@@ -8,11 +8,13 @@ export interface AuthUser {
   lastName: string;
   role: Role;
   isActive: boolean;
+  accountName: string;
 }
 
 export interface CurrentUser {
   name: string;
   role: Role;
+  accountName: string;
 }
 
 /** "H. SCAIFE" — matches the wire-desk's existing actor-name convention. */
@@ -22,6 +24,7 @@ export const wireName = (user: AuthUser): string =>
 export const toCurrentUser = (user: AuthUser): CurrentUser => ({
   name: wireName(user),
   role: user.role,
+  accountName: user.accountName,
 });
 
 /** Mirrors the real backend's RequireRole([ADMIN, RESPONDER]) gate on every mutating route. */

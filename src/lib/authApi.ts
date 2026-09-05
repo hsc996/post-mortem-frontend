@@ -10,6 +10,7 @@ function toAuthUser(u: {
   last_name: string;
   role: string;
   is_active: boolean;
+  account_name: string;
 }): AuthUser {
   return {
     id: u.id,
@@ -18,6 +19,7 @@ function toAuthUser(u: {
     lastName: u.last_name,
     role: u.role as AuthUser["role"],
     isActive: u.is_active,
+    accountName: u.account_name,
   };
 }
 
@@ -29,6 +31,41 @@ export async function login(email: string, password: string): Promise<string> {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
+    });
+  } catch {
+    throw new ApiError("Can't reach the backend. Is it running?", 0);
+  }
+  if (!response.ok) await parseError(response);
+  const data = (await response.json()) as { access_token: string };
+  return data.access_token;
+}
+
+export interface RegisterInput {
+  accountName: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+}
+
+/** Public: self-registration always creates a brand-new isolated account with
+ * the registrant as its founding admin. Returns the access token directly for
+ * auto sign-in, same as accepting an invite already does. */
+export async function register(input: RegisterInput): Promise<string> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        account_name: input.accountName,
+        email: input.email,
+        password: input.password,
+        first_name: input.firstName,
+        last_name: input.lastName,
+        ...(input.phoneNumber ? { phone_number: input.phoneNumber } : {}),
+      }),
     });
   } catch {
     throw new ApiError("Can't reach the backend. Is it running?", 0);

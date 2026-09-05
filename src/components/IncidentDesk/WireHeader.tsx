@@ -28,7 +28,7 @@ export function WireHeader({ currentUser, onSignOut, isAdmin, onManageUsers, onV
         <div className="flex flex-col items-end gap-1.5">
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold tracking-[0.06em] text-ink-dim">
-              {currentUser.name} · {currentUser.role.toUpperCase()}
+              {currentUser.name} · {currentUser.role.toUpperCase()} · {currentUser.accountName}
             </span>
             {isAdmin && (
               <>

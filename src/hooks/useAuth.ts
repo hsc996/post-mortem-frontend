@@ -67,6 +67,14 @@ export function useAuth() {
     [signInWithToken],
   );
 
+  const signUp = useCallback(
+    async (input: authApi.RegisterInput) => {
+      const newToken = await authApi.register(input);
+      await signInWithToken(newToken);
+    },
+    [signInWithToken],
+  );
+
   const signOut = useCallback(async () => {
     if (token) await authApi.logout(token);
     localStorage.removeItem(TOKEN_KEY);
@@ -76,5 +84,5 @@ export function useAuth() {
     setStatus("unauthenticated");
   }, [token]);
 
-  return { status, user, token, sessionExpired, signIn, signInWithToken, signOut };
+  return { status, user, token, sessionExpired, signIn, signUp, signInWithToken, signOut };
 }

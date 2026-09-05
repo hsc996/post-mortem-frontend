@@ -6,7 +6,7 @@ import { useAuth } from "./hooks/useAuth";
 const INVITE_PATH_PREFIX = "/invite/";
 
 function App() {
-  const { status, user, token, sessionExpired, signIn, signInWithToken, signOut } = useAuth();
+  const { status, user, token, sessionExpired, signIn, signUp, signInWithToken, signOut } = useAuth();
 
   if (window.location.pathname.startsWith(INVITE_PATH_PREFIX)) {
     const inviteToken = window.location.pathname.slice(INVITE_PATH_PREFIX.length);
@@ -30,7 +30,7 @@ function App() {
   }
 
   if (status === "unauthenticated" || !user || !token) {
-    return <LoginScreen onSignIn={signIn} sessionExpired={sessionExpired} />;
+    return <LoginScreen onSignIn={signIn} onSignUp={signUp} sessionExpired={sessionExpired} />;
   }
 
   return <IncidentDesk currentUser={user} token={token} onSignOut={signOut} />;

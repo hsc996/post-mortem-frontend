@@ -45,3 +45,14 @@ export interface AuditEntry {
   occurredAt: string;
   detail?: string;
 }
+
+/** System-wide audit entry — spans incidents, mitigations, and users, so `action`/`entityType` aren't restricted to the incident-scoped AuditAction union. */
+export interface GlobalAuditEntry {
+  id: string;
+  entityType: string;
+  entityLabel: string;
+  action: string;
+  actorName: string;
+  occurredAt: string;
+  detail?: string;
+}

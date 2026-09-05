@@ -136,6 +136,20 @@ export async function fetchAuditLog(token: string, incidentId: string): Promise<
   return handle<AuditLogDto[]>(await authFetch(token, `/incidents/${incidentId}/audit-log`));
 }
 
+export interface GlobalAuditLogFilters {
+  entityType?: string;
+  actorId?: string;
+  limit?: number;
+}
+
+export async function fetchGlobalAuditLog(token: string, filters: GlobalAuditLogFilters = {}): Promise<AuditLogDto[]> {
+  const params = new URLSearchParams();
+  if (filters.entityType) params.set("entity_type", filters.entityType);
+  if (filters.actorId) params.set("actor_id", filters.actorId);
+  params.set("limit", String(filters.limit ?? 100));
+  return handle<AuditLogDto[]>(await authFetch(token, `/audit-logs/?${params.toString()}`));
+}
+
 export async function claimIncident(
   token: string,
   incidentId: string,

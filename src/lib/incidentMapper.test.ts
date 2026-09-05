@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildUserMap, mapAuditEntry, mapIncident, mapMitigation } from "./incidentMapper";
+import { buildUserMap, mapAuditEntry, mapGlobalAuditEntry, mapIncident, mapMitigation } from "./incidentMapper";
 import type { AuditLogDto, IncidentDto, MitigationDto, UserDto } from "./incidentsApi";
 
 const users: UserDto[] = [
@@ -113,5 +113,57 @@ describe("mapAuditEntry", () => {
   it("resolves the actor name even when it's the target of the change (unknown actor id)", () => {
     const entry = mapAuditEntry({ ...baseAudit, actor_id: "ghost" }, userMap);
     expect(entry?.actorName).toBe("UNKNOWN");
+  });
+});
+
+describe("mapGlobalAuditEntry", () => {
+  const baseAudit: AuditLogDto = {
+    id: "a1",
+    entity_type: "incident",
+    entity_id: "i1",
+    action: "INCIDENT_CREATED",
+    actor_id: "u1",
+    changes: {},
+    ip_address: null,
+    incident_id: "i1",
+    created_at: "2026-01-01T00:00:00Z",
+  };
+
+  it("never returns null — the global log shows every action, unlike the incident-scoped mapper", () => {
+    const entry = mapGlobalAuditEntry({ ...baseAudit, action: "USER_ROLE_CHANGED", changes: { role: "admin" } }, userMap);
+    expect(entry).not.toBeNull();
+    expect(entry.detail).toBe("Role changed to ADMIN");
+  });
+
+  it("resolves a 'user' entity's id to a wire name instead of showing the raw UUID", () => {
+    const entry = mapGlobalAuditEntry(
+      { ...baseAudit, entity_type: "user", entity_id: "u2", action: "USER_ROLE_CHANGED", changes: { role: "viewer" } },
+      userMap,
+    );
+    expect(entry.entityLabel).toBe("T. ÁLVAREZ");
+  });
+
+  it("falls back to 'entityType shortId' for a non-user entity or an unresolvable user id", () => {
+    const incidentEntry = mapGlobalAuditEntry({ ...baseAudit, entity_id: "i1234567-full-uuid" }, userMap);
+    expect(incidentEntry.entityLabel).toBe("incident i1234567");
+
+    const ghostUserEntry = mapGlobalAuditEntry({ ...baseAudit, entity_type: "user", entity_id: "ghost1234" }, userMap);
+    expect(ghostUserEntry.entityLabel).toBe("user ghost123");
+  });
+
+  it("reuses the incident-scoped detail logic for known actions", () => {
+    const entry = mapGlobalAuditEntry(
+      { ...baseAudit, changes: { severity: "high", service_name: "auth-service" } },
+      userMap,
+    );
+    expect(entry.detail).toBe("HIGH severity, reported against auth-service");
+  });
+
+  it("falls back to a generic key:value rendering for an unrecognized action with changes", () => {
+    const entry = mapGlobalAuditEntry(
+      { ...baseAudit, action: "SOMETHING_FUTURE", changes: { foo: "bar", n: 3 } },
+      userMap,
+    );
+    expect(entry.detail).toBe("foo: bar, n: 3");
   });
 });

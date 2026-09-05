@@ -1,4 +1,4 @@
-import type { AuditAction, AuditEntry, Incident, Mitigation } from "../types/incident";
+import type { AuditAction, AuditEntry, GlobalAuditEntry, Incident, Mitigation } from "../types/incident";
 import type { AuditLogDto, IncidentDto, MitigationDto, UserDto } from "./incidentsApi";
 
 /** "H. SCAIFE" — matches types/user.ts's wireName convention for the current user. */
@@ -86,5 +86,42 @@ export function mapAuditEntry(dto: AuditLogDto, userMap: UserMap): AuditEntry | 
     actorName,
     occurredAt: dto.created_at,
     detail: describeAuditEntry(dto.action, dto.changes, actorName),
+  };
+}
+
+/**
+ * The global log spans entity types the incident-scoped mapper above
+ * deliberately excludes (e.g. USER_ROLE_CHANGED) — this is where that
+ * history actually becomes visible for the first time.
+ */
+function describeGlobalDetail(action: string, changes: Record<string, unknown>, actorName: string): string | undefined {
+  if (action === "USER_ROLE_CHANGED") {
+    const role = typeof changes.role === "string" ? changes.role.toUpperCase() : null;
+    return role ? `Role changed to ${role}` : undefined;
+  }
+  const known = describeAuditEntry(action, changes, actorName);
+  if (known) return known;
+  const keys = Object.keys(changes);
+  return keys.length > 0 ? keys.map((k) => `${k}: ${String(changes[k])}`).join(", ") : undefined;
+}
+
+function entityLabel(entityType: string, entityId: string, userMap: UserMap): string {
+  if (entityType === "user") {
+    const name = userMap.get(entityId);
+    if (name) return name;
+  }
+  return `${entityType} ${entityId.slice(0, 8)}`;
+}
+
+export function mapGlobalAuditEntry(dto: AuditLogDto, userMap: UserMap): GlobalAuditEntry {
+  const actorName = resolveName(userMap, dto.actor_id);
+  return {
+    id: dto.id,
+    entityType: dto.entity_type,
+    entityLabel: entityLabel(dto.entity_type, dto.entity_id, userMap),
+    action: dto.action,
+    actorName,
+    occurredAt: dto.created_at,
+    detail: describeGlobalDetail(dto.action, dto.changes, actorName),
   };
 }

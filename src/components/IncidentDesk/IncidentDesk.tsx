@@ -13,6 +13,7 @@ import { ErrorState } from "./ErrorState";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
 import { NewIncidentPanel } from "./NewIncidentPanel";
 import { AdminUsersScreen } from "../Admin/AdminUsersScreen";
+import { GlobalAuditLogScreen } from "../Admin/GlobalAuditLogScreen";
 
 const LOADING_SKELETON_SPECS: SkeletonSpec[] = [
   { hasMitigation: false, actionRowKind: "button" },
@@ -71,7 +72,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [newIncidentOpen, setNewIncidentOpen] = useState(false);
-  const [view, setView] = useState<"desk" | "admin">("desk");
+  const [view, setView] = useState<"desk" | "admin" | "audit">("desk");
   const openerRef = useRef<HTMLElement | null>(null);
 
   const sorted = useMemo(() => (incidents ? sortIncidents(incidents, now) : []), [incidents, now]);
@@ -122,6 +123,14 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
     );
   }
 
+  if (view === "audit" && isAdmin) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <GlobalAuditLogScreen token={token} onBack={() => setView("desk")} />
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-paper">
@@ -130,6 +139,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
         onSignOut={onSignOut}
         isAdmin={isAdmin}
         onManageUsers={() => setView("admin")}
+        onViewAuditLog={() => setView("audit")}
       />
 
       {selectedIncidentId && selectedIncident && (

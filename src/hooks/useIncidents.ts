@@ -140,6 +140,23 @@ export function useIncidents(token: string) {
     [token],
   );
 
+  const applyMitigation = useCallback(
+    async (id: string, summary: string, ttlMinutes: number): Promise<PanelActionResult> => {
+      try {
+        const mitigationDto = await api.createMitigation(token, id, { summary, ttlMinutes });
+        const mitigation = mapMitigation(mitigationDto, userMapRef.current);
+        const dto = await api.getIncident(token, id);
+        const updated = mapIncident(dto, userMapRef.current, mitigation);
+        patchIncident(updated);
+        void loadAuditTrail(id);
+        return { ok: true, incident: updated };
+      } catch (err) {
+        return toActionResult(err);
+      }
+    },
+    [token, patchIncident, loadAuditTrail],
+  );
+
   const unwind = useCallback(
     async (id: string): Promise<PanelActionResult> => {
       try {
@@ -167,5 +184,6 @@ export function useIncidents(token: string) {
     unwind,
     refreshIncident,
     createIncident,
+    applyMitigation,
   };
 }

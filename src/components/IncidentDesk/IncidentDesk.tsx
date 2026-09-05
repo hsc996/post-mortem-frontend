@@ -66,6 +66,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
     unwind,
     refreshIncident,
     createIncident,
+    applyMitigation,
   } = useIncidents(token);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -87,6 +88,8 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
   const handlePanelClaim = (id: string, expectedVersion: number) => claim(id, expectedVersion, authUser.id);
   const handlePanelResolve = (id: string) => resolve(id);
   const handlePanelUnwind = (id: string) => unwind(id);
+  const handlePanelApplyMitigation = (id: string, summary: string, ttlMinutes: number) =>
+    applyMitigation(id, summary, ttlMinutes);
 
   const handleSelect = (id: string, opener: HTMLElement) => {
     openerRef.current = opener;
@@ -140,6 +143,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           onClaim={handlePanelClaim}
           onResolve={handlePanelResolve}
           onUnwind={handlePanelUnwind}
+          onApplyMitigation={handlePanelApplyMitigation}
           onReload={refreshIncident}
         />
       )}

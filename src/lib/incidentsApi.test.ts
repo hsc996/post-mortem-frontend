@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import * as apiClient from "./apiClient";
-import { claimIncident, ConflictError, getMitigation, resolveIncident } from "./incidentsApi";
+import { claimIncident, ConflictError, createMitigation, getMitigation, resolveIncident } from "./incidentsApi";
 
 function fakeResponse(status: number, body: unknown): Response {
   return {
@@ -54,5 +54,31 @@ describe("incidentsApi conflict parsing", () => {
     vi.spyOn(apiClient, "authFetch").mockResolvedValue(fakeResponse(404, { detail: "not found" }));
 
     await expect(getMitigation("tok", "id1")).resolves.toBeNull();
+  });
+
+  it("createMitigation POSTs the snake_case body to the right URL", async () => {
+    const authFetch = vi.spyOn(apiClient, "authFetch").mockResolvedValue(
+      fakeResponse(201, {
+        id: "m1",
+        incident_id: "id1",
+        summary: "Pinned previous cert chain",
+        ttl_minutes: 90,
+        applied_at: "2026-01-01T00:00:00Z",
+        applied_by_id: "u1",
+        is_expired: false,
+      }),
+    );
+
+    const result = await createMitigation("tok", "id1", { summary: "Pinned previous cert chain", ttlMinutes: 90 });
+
+    expect(authFetch).toHaveBeenCalledWith(
+      "tok",
+      "/incidents/id1/mitigation/",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ summary: "Pinned previous cert chain", ttl_minutes: 90 }),
+      }),
+    );
+    expect(result.ttl_minutes).toBe(90);
   });
 });

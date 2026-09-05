@@ -158,3 +158,22 @@ export async function resolveIncident(token: string, incidentId: string): Promis
 export async function clearMitigation(token: string, incidentId: string): Promise<void> {
   return handle<void>(await authFetch(token, `/incidents/${incidentId}/mitigation/`, { method: "DELETE" }));
 }
+
+export interface MitigationCreateInput {
+  summary: string;
+  ttlMinutes: number;
+}
+
+export async function createMitigation(
+  token: string,
+  incidentId: string,
+  input: MitigationCreateInput,
+): Promise<MitigationDto> {
+  return handle<MitigationDto>(
+    await authFetch(token, `/incidents/${incidentId}/mitigation/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ summary: input.summary, ttl_minutes: input.ttlMinutes }),
+    }),
+  );
+}

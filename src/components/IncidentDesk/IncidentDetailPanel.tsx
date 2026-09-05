@@ -8,6 +8,7 @@ import { PrecedenceStamp } from "./PrecedenceStamp";
 import { StatusTag } from "./StatusTag";
 import { MitigationReadout } from "./MitigationReadout";
 import { PanelActionRow } from "./PanelActionRow";
+import { MitigationCreateForm } from "./MitigationCreateForm";
 import { ConflictNotice } from "./ConflictNotice";
 import { AuditTrailFeed } from "./AuditTrailFeed";
 
@@ -20,6 +21,7 @@ interface IncidentDetailPanelProps {
   onClaim: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onResolve: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
   onUnwind: (id: string, expectedVersion: number) => Promise<PanelActionResult>;
+  onApplyMitigation: (id: string, summary: string, ttlMinutes: number) => Promise<PanelActionResult>;
   onReload: (id: string) => Promise<Incident | null>;
 }
 
@@ -39,6 +41,7 @@ export function IncidentDetailPanel({
   onClaim,
   onResolve,
   onUnwind,
+  onApplyMitigation,
   onReload,
 }: IncidentDetailPanelProps) {
   const now = useClock();
@@ -52,33 +55,49 @@ export function IncidentDetailPanel({
   const [blockedReason, setBlockedReason] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [showMitigationForm, setShowMitigationForm] = useState(false);
 
   useEffect(() => {
     if (isOpen) closeButtonRef.current?.focus();
   }, [isOpen]);
+
+  const settle = useCallback((result: PanelActionResult, successText: string) => {
+    if (!result.ok) {
+      setSuccessMessage(null);
+      if (result.kind === "conflict") {
+        setConflict({ expected: result.expected, current: result.current });
+        setBlockedReason(null);
+      } else {
+        setBlockedReason(result.reason);
+        setConflict(null);
+      }
+      return;
+    }
+    setSnapshot(result.incident);
+    setConflict(null);
+    setBlockedReason(null);
+    setSuccessMessage(successText);
+  }, []);
 
   const dispatch = useCallback(
     async (action: (id: string, version: number) => Promise<PanelActionResult>, successText: string) => {
       setPending(true);
       const result = await action(snapshot.id, snapshot.version);
       setPending(false);
-      if (!result.ok) {
-        setSuccessMessage(null);
-        if (result.kind === "conflict") {
-          setConflict({ expected: result.expected, current: result.current });
-          setBlockedReason(null);
-        } else {
-          setBlockedReason(result.reason);
-          setConflict(null);
-        }
-        return;
-      }
-      setSnapshot(result.incident);
-      setConflict(null);
-      setBlockedReason(null);
-      setSuccessMessage(successText);
+      settle(result, successText);
     },
-    [snapshot],
+    [snapshot, settle],
+  );
+
+  const dispatchMitigation = useCallback(
+    async (summary: string, ttlMinutes: number) => {
+      setPending(true);
+      const result = await onApplyMitigation(snapshot.id, summary, ttlMinutes);
+      setPending(false);
+      settle(result, "Mitigation applied.");
+      if (result.ok) setShowMitigationForm(false);
+    },
+    [snapshot.id, onApplyMitigation, settle],
   );
 
   const [reloading, setReloading] = useState(false);
@@ -98,13 +117,18 @@ export function IncidentDetailPanel({
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        if (showMitigationForm) {
+          setShowMitigationForm(false);
+          setBlockedReason(null);
+        } else {
+          onClose();
+        }
         return;
       }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const isResolved = snapshot.status === "resolved";
       const key = e.key.toLowerCase();
-      if (pending) return;
+      if (pending || showMitigationForm) return;
       if (key === "c" && canAct && !isResolved && !snapshot.assigneeName) {
         e.preventDefault();
         void dispatch(onClaim, "Claimed.");
@@ -114,11 +138,14 @@ export function IncidentDetailPanel({
       } else if (key === "u" && canAct && !isResolved && snapshot.mitigation) {
         e.preventDefault();
         void dispatch(onUnwind, "Mitigation cleared.");
+      } else if (key === "m" && canAct && !isResolved && !snapshot.mitigation) {
+        e.preventDefault();
+        setShowMitigationForm(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind, pending]);
+  }, [isOpen, onClose, canAct, snapshot, dispatch, onClaim, onResolve, onUnwind, pending, showMitigationForm]);
 
   return (
     <aside
@@ -172,6 +199,16 @@ export function IncidentDetailPanel({
               onReload={() => void handleReload()}
               reloading={reloading}
             />
+          ) : showMitigationForm ? (
+            <MitigationCreateForm
+              pending={pending}
+              blockedReason={blockedReason}
+              onSubmit={(summary, ttlMinutes) => void dispatchMitigation(summary, ttlMinutes)}
+              onCancel={() => {
+                setShowMitigationForm(false);
+                setBlockedReason(null);
+              }}
+            />
           ) : (
             <PanelActionRow
               incident={snapshot}
@@ -179,6 +216,7 @@ export function IncidentDetailPanel({
               onClaim={() => void dispatch(onClaim, "Claimed.")}
               onResolve={() => void dispatch(onResolve, "Resolved.")}
               onUnwind={() => void dispatch(onUnwind, "Mitigation cleared.")}
+              onApplyMitigation={() => setShowMitigationForm(true)}
               blockedReason={blockedReason}
               successMessage={successMessage}
               pending={pending}

@@ -26,3 +26,4 @@ export const toCurrentUser = (user: AuthUser): CurrentUser => ({
 
 /** Mirrors the real backend's RequireRole([ADMIN, RESPONDER]) gate on every mutating route. */
 export const canMutate = (role: Role): boolean => role !== "viewer";
+``

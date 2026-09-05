@@ -1,5 +1,6 @@
 /** VITE_API_URL is the bare backend origin (no path) — the /api/v1 prefix is this app's own concern. */
-export const API_BASE = `${import.meta.env.VITE_API_URL.replace(/\/+$/, "")}/api/v1`;
+const API_ORIGIN = import.meta.env.DEV ? "http://localhost:8000" : import.meta.env.VITE_API_URL;
+export const API_BASE = `${API_ORIGIN.replace(/\/+$/, "")}/api/v1`;
 
 export class ApiError extends Error {
   status: number;

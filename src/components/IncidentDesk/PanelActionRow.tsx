@@ -1,6 +1,7 @@
 import type { Incident } from "../../types/incident";
 import { ClaimControl } from "./ClaimControl";
 import { UnwindControl } from "./UnwindControl";
+import { ApplyMitigationControl } from "./ApplyMitigationControl";
 import { KeyHint } from "./KeyHint";
 
 interface PanelActionRowProps {
@@ -9,6 +10,7 @@ interface PanelActionRowProps {
   onClaim: () => void;
   onResolve: () => void;
   onUnwind: () => void;
+  onApplyMitigation: () => void;
   blockedReason: string | null;
   successMessage: string | null;
   pending: boolean;
@@ -24,6 +26,7 @@ export function PanelActionRow({
   onClaim,
   onResolve,
   onUnwind,
+  onApplyMitigation,
   blockedReason,
   successMessage,
   pending,
@@ -44,7 +47,11 @@ export function PanelActionRow({
     <div className="flex flex-col gap-3">
       <div className={`flex flex-wrap items-center gap-x-2 gap-y-4 ${pending ? "opacity-50" : ""}`}>
         <ClaimControl assigneeName={incident.assigneeName} onClaim={pending ? () => {} : onClaim} shortcutHint="C" />
-        {incident.mitigation && <UnwindControl onUnwind={pending ? () => {} : onUnwind} />}
+        {incident.mitigation ? (
+          <UnwindControl onUnwind={pending ? () => {} : onUnwind} />
+        ) : (
+          <ApplyMitigationControl onApply={pending ? () => {} : onApplyMitigation} />
+        )}
         <button
           type="button"
           onClick={onResolve}

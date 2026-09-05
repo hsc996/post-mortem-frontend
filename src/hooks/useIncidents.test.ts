@@ -16,6 +16,7 @@ vi.mock("../lib/incidentsApi", async (importOriginal) => {
     claimIncident: vi.fn(),
     resolveIncident: vi.fn(),
     clearMitigation: vi.fn(),
+    createMitigation: vi.fn(),
     fetchAuditLog: vi.fn(),
   };
 });
@@ -105,6 +106,49 @@ describe("useIncidents", () => {
     let outcome;
     await act(async () => {
       outcome = await result.current.resolve("i1");
+    });
+
+    expect(outcome).toMatchObject({ ok: false, kind: "blocked" });
+  });
+
+  it("applyMitigation: on success, refetches the incident and patches the mapped mitigation in place", async () => {
+    vi.mocked(api.createMitigation).mockResolvedValue({
+      id: "m1",
+      incident_id: "i1",
+      summary: "Pinned previous cert chain",
+      ttl_minutes: 60,
+      applied_at: "2026-01-01T00:00:00Z",
+      applied_by_id: "u1",
+      is_expired: false,
+    });
+    vi.mocked(api.getIncident).mockResolvedValue({ ...openIncident, status: "mitigated", version: 2 });
+    const { result } = renderHook(() => useIncidents("tok"));
+    await waitFor(() => expect(result.current.incidents).not.toBeNull());
+
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.applyMitigation("i1", "Pinned previous cert chain", 60);
+    });
+
+    expect(outcome).toMatchObject({ ok: true });
+    expect(result.current.incidents![0].status).toBe("mitigated");
+    expect(result.current.incidents![0].mitigation).toMatchObject({
+      summary: "Pinned previous cert chain",
+      ttlMinutes: 60,
+      appliedByName: "H. SCAIFE",
+    });
+  });
+
+  it("applyMitigation: a real 409 (mitigation already exists) surfaces as 'blocked', not 'conflict'", async () => {
+    vi.mocked(api.createMitigation).mockRejectedValue(
+      Object.assign(new Error("An active mitigation already exists for this incident."), { status: 409 }),
+    );
+    const { result } = renderHook(() => useIncidents("tok"));
+    await waitFor(() => expect(result.current.incidents).not.toBeNull());
+
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.applyMitigation("i1", "Some fix", 60);
     });
 
     expect(outcome).toMatchObject({ ok: false, kind: "blocked" });

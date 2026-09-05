@@ -5,16 +5,17 @@ import { RateLimitError } from "../../lib/apiClient";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
 import { TextField } from "./TextField";
 
+type Mode = "signin" | "register";
+
 interface LoginScreenProps {
   onSignIn: (email: string, password: string) => Promise<void>;
   onSignUp: (input: RegisterInput) => Promise<void>;
   sessionExpired: boolean;
+  initialMode?: Mode;
 }
 
-type Mode = "signin" | "register";
-
-export function LoginScreen({ onSignIn, onSignUp, sessionExpired }: LoginScreenProps) {
-  const [mode, setMode] = useState<Mode>("signin");
+export function LoginScreen({ onSignIn, onSignUp, sessionExpired, initialMode = "signin" }: LoginScreenProps) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountName, setAccountName] = useState("");

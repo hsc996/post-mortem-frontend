@@ -1,9 +1,11 @@
 import { IncidentDesk } from "./components/IncidentDesk/IncidentDesk";
 import { LoginScreen } from "./components/Auth/LoginScreen";
 import { AcceptInviteScreen } from "./components/Auth/AcceptInviteScreen";
+import { LandingScreen } from "./components/Landing/LandingScreen";
 import { useAuth } from "./hooks/useAuth";
 
 const INVITE_PATH_PREFIX = "/invite/";
+const LOGIN_PATH = "/login";
 
 function App() {
   const { status, user, token, sessionExpired, signIn, signUp, signInWithToken, signOut } = useAuth();
@@ -30,7 +32,18 @@ function App() {
   }
 
   if (status === "unauthenticated" || !user || !token) {
-    return <LoginScreen onSignIn={signIn} onSignUp={signUp} sessionExpired={sessionExpired} />;
+    if (sessionExpired || window.location.pathname === LOGIN_PATH) {
+      const initialMode = new URLSearchParams(window.location.search).get("mode") === "register" ? "register" : "signin";
+      return (
+        <LoginScreen onSignIn={signIn} onSignUp={signUp} sessionExpired={sessionExpired} initialMode={initialMode} />
+      );
+    }
+    return (
+      <LandingScreen
+        onSignIn={() => window.location.assign(LOGIN_PATH)}
+        onGetStarted={() => window.location.assign(`${LOGIN_PATH}?mode=register`)}
+      />
+    );
   }
 
   return <IncidentDesk currentUser={user} token={token} onSignOut={signOut} />;

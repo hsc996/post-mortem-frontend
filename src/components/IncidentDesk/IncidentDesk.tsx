@@ -211,7 +211,7 @@ export function IncidentDesk({ currentUser: authUser, token, onSignOut }: Incide
           )
         ) : (
           <>
-            <div className="mx-auto flex max-w-4xl justify-end gap-3 px-5 pb-6 pt-4 sm:px-8">
+            <div className="mx-auto flex max-w-4xl justify-end gap-3 px-5 py-6 sm:px-8">
               <button
                 type="button"
                 onClick={() => setView("history")}

@@ -1,6 +1,6 @@
 import { motion, MotionConfig } from "motion/react";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
-import heroFeed from "../../assets/landing/hero-feed.jpg";
+import heroFeed from "../../assets/landing/hero-feed.png";
 import readTimeTruth from "../../assets/landing/read-time-truth.png";
 import optimisticLocking from "../../assets/landing/optimistic-locking.png";
 import auditTrail from "../../assets/landing/audit-trail.png";
@@ -14,6 +14,8 @@ interface Mechanism {
   heading: string;
   body: string;
   image: string;
+  width: number;
+  height: number;
   alt: string;
 }
 
@@ -22,18 +24,24 @@ const MECHANISMS: Mechanism[] = [
     heading: "NOTHING IS EVER STALE.",
     body: "A mitigation's expiry isn't pushed to you and cached — it's computed the instant you look, from when it was applied and how long it was meant to last. If it's expired, the wire says so the moment you open it, not whenever the last update happened to arrive.",
     image: readTimeTruth,
+    width: 510,
+    height: 430,
     alt: "An expired mitigation shown as a solid alarm banner, computed live rather than cached",
   },
   {
     heading: "TWO RESPONDERS, ONE INCIDENT, ZERO SILENT OVERWRITES.",
     body: "Every edit carries the version it was based on. If someone else moved first, your update is rejected outright with a real conflict to resolve — never a quiet overwrite of their work.",
     image: optimisticLocking,
+    width: 510,
+    height: 210,
     alt: "A version-conflict notice: expected version 4, but current version is 5",
   },
   {
     heading: "EVERY ACTION PUNCHES A NEW LINE.",
     body: "Claims, mitigations, resolutions, role changes — every mutation writes an append-only entry in the same transaction. The audit trail isn't a feature you maintain; it's infrastructure that's already there when you need it.",
     image: auditTrail,
+    width: 510,
+    height: 210,
     alt: "An append-only audit trail listing claim, mitigation, and log entries in order",
   },
 ];
@@ -89,8 +97,10 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
             <div className="w-full flex-1">
               <img
                 src={heroFeed}
+                width={910}
+                height={345}
                 alt="The live incident wire, showing a mix of open, mitigated, and expired incidents"
-                className="w-full border border-rule"
+                className="h-auto w-full border border-rule"
               />
             </div>
           </motion.section>
@@ -111,7 +121,13 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
                   <p className="max-w-[60ch] text-sm leading-relaxed text-ink-dim sm:text-base">{mechanism.body}</p>
                 </div>
                 <div className="w-full flex-1">
-                  <img src={mechanism.image} alt={mechanism.alt} className="w-full border border-rule" />
+                  <img
+                    src={mechanism.image}
+                    width={mechanism.width}
+                    height={mechanism.height}
+                    alt={mechanism.alt}
+                    className="h-auto w-full border border-rule"
+                  />
                 </div>
               </motion.section>
             ))}

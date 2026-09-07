@@ -46,6 +46,17 @@ const MECHANISMS: Mechanism[] = [
   },
 ];
 
+/** Each section is its own reveal, triggered as it crosses into view — the
+ * same spring stagger the rest of the product uses on mount (DESIGN.md's
+ * One-Entrance Rule), just retriggered per-section since this is a long
+ * scrolling Persuade surface rather than a single-viewport app screen. */
+const revealProps = {
+  initial: "hidden",
+  whileInView: "show",
+  viewport: { once: true, amount: 0.3 as const },
+  variants: feedContainerVariants,
+};
+
 export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
   return (
     <MotionConfig reducedMotion="user">
@@ -68,17 +79,12 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
           </div>
         </header>
 
-        <motion.main
-          initial="hidden"
-          animate="show"
-          variants={feedContainerVariants}
-          className="mx-auto flex max-w-5xl flex-col gap-20 px-5 py-16 sm:px-8 sm:py-24"
-        >
+        <main className="mx-auto flex max-w-5xl flex-col gap-28 px-5 py-20 sm:px-8 sm:py-28 lg:gap-36">
           <motion.section
-            variants={feedItemVariants}
-            className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:gap-16"
+            {...revealProps}
+            className="flex flex-col items-start gap-10 lg:flex-row lg:items-center lg:gap-20"
           >
-            <div className="flex flex-1 flex-col gap-6">
+            <motion.div variants={feedItemVariants} className="flex flex-1 flex-col gap-8">
               <h1 className="font-display text-3xl font-extrabold uppercase leading-tight tracking-wide text-ink sm:text-4xl lg:text-5xl">
                 Incidents don't wait for a wiki page to load.
               </h1>
@@ -93,8 +99,8 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
               >
                 CREATE YOUR ACCOUNT
               </button>
-            </div>
-            <div className="w-full flex-1">
+            </motion.div>
+            <motion.div variants={feedItemVariants} className="w-full flex-1">
               <img
                 src={heroFeed}
                 width={910}
@@ -102,25 +108,25 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
                 alt="The live incident wire, showing a mix of open, mitigated, and expired incidents"
                 className="h-auto w-full border border-rule"
               />
-            </div>
+            </motion.div>
           </motion.section>
 
-          <div className="flex flex-col gap-16">
+          <div className="flex flex-col gap-28 lg:gap-36">
             {MECHANISMS.map((mechanism, i) => (
               <motion.section
                 key={mechanism.heading}
-                variants={feedItemVariants}
-                className={`flex flex-col items-start gap-8 border-t border-rule pt-16 lg:items-center lg:gap-16 ${
+                {...revealProps}
+                className={`flex flex-col items-start gap-10 border-t border-rule pt-20 lg:items-center lg:gap-20 ${
                   i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"
                 }`}
               >
-                <div className="flex flex-1 flex-col gap-4">
+                <motion.div variants={feedItemVariants} className="flex flex-1 flex-col gap-5">
                   <h2 className="text-xl font-semibold uppercase tracking-[0.06em] text-ink sm:text-2xl">
                     {mechanism.heading}
                   </h2>
                   <p className="max-w-[60ch] text-sm leading-relaxed text-ink-dim sm:text-base">{mechanism.body}</p>
-                </div>
-                <div className="w-full flex-1">
+                </motion.div>
+                <motion.div variants={feedItemVariants} className="w-full flex-1">
                   <img
                     src={mechanism.image}
                     width={mechanism.width}
@@ -128,34 +134,36 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
                     alt={mechanism.alt}
                     className="h-auto w-full border border-rule"
                   />
-                </div>
+                </motion.div>
               </motion.section>
             ))}
           </div>
 
           <motion.section
-            variants={feedItemVariants}
-            className="flex flex-col items-center gap-6 border-t border-rule pt-16 text-center"
+            {...revealProps}
+            className="flex flex-col items-center gap-8 border-t border-rule pt-20 text-center"
           >
-            <h2 className="font-display max-w-[24ch] text-2xl font-extrabold uppercase leading-tight tracking-wide text-ink sm:text-3xl">
+            <motion.h2
+              variants={feedItemVariants}
+              className="font-display max-w-[24ch] text-2xl font-extrabold uppercase leading-tight tracking-wide text-ink sm:text-3xl"
+            >
               Your team's next incident is coming.
-            </h2>
-            <p className="max-w-[48ch] text-sm text-ink-dim sm:text-base">
+            </motion.h2>
+            <motion.p variants={feedItemVariants} className="max-w-[48ch] text-sm text-ink-dim sm:text-base">
               Get the wire up before it does.
-            </p>
-            <button
+            </motion.p>
+            <motion.button
+              variants={feedItemVariants}
               type="button"
               onClick={onGetStarted}
               className="inline-flex min-h-11 w-fit items-center justify-center border border-ink px-6 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
             >
               CREATE YOUR ACCOUNT
-            </button>
+            </motion.button>
           </motion.section>
 
-          <motion.p variants={feedItemVariants} className="text-center text-xs tracking-[0.2em] text-ink-dim">
-            — 30 —
-          </motion.p>
-        </motion.main>
+          <p className="text-center text-xs tracking-[0.2em] text-ink-dim">— 30 —</p>
+        </main>
       </div>
     </MotionConfig>
   );

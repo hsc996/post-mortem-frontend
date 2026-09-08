@@ -4,6 +4,7 @@ import type { AuditEntry, Incident } from "../../types/incident";
 import type { PanelActionResult } from "../../types/panelAction";
 import type { IncidentEditInput } from "../../lib/incidentsApi";
 import { feedContainerVariants } from "../../lib/motionVariants";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import { IncidentBulletin } from "./IncidentBulletin";
 import { IncidentDetailPanel } from "./IncidentDetailPanel";
 
@@ -75,23 +76,15 @@ export function PastIncidentsScreen({
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="sticky top-0 z-50 border-b-4 border-double border-steel bg-paper px-5 py-4 sm:px-8">
-        <div className="mx-auto flex max-w-4xl items-end justify-between gap-4">
-          <div>
-            <p className="font-display text-xl font-extrabold uppercase tracking-wide text-ink sm:text-2xl">
-              PAST INCIDENTS
-            </p>
-            <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">RESOLVED — HISTORY</p>
-          </div>
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
-          >
-            BACK TO WIRE
-          </button>
-        </div>
-      </header>
+      <ScreenHeader subtitle="PAST INCIDENTS — RESOLVED HISTORY">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+        >
+          BACK TO WIRE
+        </button>
+      </ScreenHeader>
 
       {selectedIncidentId && selectedIncident && (
         <IncidentDetailPanel

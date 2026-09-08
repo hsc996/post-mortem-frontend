@@ -4,6 +4,7 @@ import { useUsers } from "../../hooks/useUsers";
 import { useInvites } from "../../hooks/useInvites";
 import type { Role } from "../../types/user";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import { InviteUserPanel } from "./InviteUserPanel";
 
 const ROLES: Role[] = ["admin", "responder", "viewer"];
@@ -37,32 +38,22 @@ export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScr
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="sticky top-0 z-50 border-b-4 border-double border-steel bg-paper px-5 py-4 sm:px-8">
-        <div className="mx-auto flex max-w-4xl items-end justify-between gap-4">
-          <div>
-            <p className="font-display text-xl font-extrabold uppercase tracking-wide text-ink sm:text-2xl">
-              USER DIRECTORY
-            </p>
-            <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">ADMIN — ROLE MANAGEMENT</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setInvitePanelOpen(true)}
-              className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
-            >
-              + INVITE USER
-            </button>
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
-            >
-              BACK TO WIRE
-            </button>
-          </div>
-        </div>
-      </header>
+      <ScreenHeader subtitle="USER DIRECTORY — ROLE MANAGEMENT">
+        <button
+          type="button"
+          onClick={() => setInvitePanelOpen(true)}
+          className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+        >
+          + INVITE USER
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+        >
+          BACK TO WIRE
+        </button>
+      </ScreenHeader>
 
       <InviteUserPanel isOpen={invitePanelOpen} onClose={() => setInvitePanelOpen(false)} onSend={sendInvite} />
 

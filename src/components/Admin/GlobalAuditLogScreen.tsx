@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { useGlobalAuditLog } from "../../hooks/useGlobalAuditLog";
 import { formatWireDate } from "../../lib/wireFormat";
 import { feedContainerVariants, feedItemVariants } from "../../lib/motionVariants";
+import { ScreenHeader } from "../shared/ScreenHeader";
 
 interface GlobalAuditLogScreenProps {
   token: string;
@@ -18,25 +19,15 @@ export function GlobalAuditLogScreen({ token, onBack }: GlobalAuditLogScreenProp
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="sticky top-0 z-50 border-b-4 border-double border-steel bg-paper px-5 py-4 sm:px-8">
-        <div className="mx-auto flex max-w-4xl items-end justify-between gap-4">
-          <div>
-            <p className="font-display text-xl font-extrabold uppercase tracking-wide text-ink sm:text-2xl">
-              AUDIT LOG
-            </p>
-            <p className="mt-0.5 text-[11px] font-medium tracking-[0.2em] text-ink-dim">
-              SYSTEM-WIDE — EVERY LOGGED ACTION
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
-          >
-            BACK TO WIRE
-          </button>
-        </div>
-      </header>
+      <ScreenHeader subtitle="AUDIT LOG — SYSTEM-WIDE">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-11 items-center border border-ink px-4 text-xs font-semibold tracking-[0.1em] text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:bg-ink focus-visible:text-paper"
+        >
+          BACK TO WIRE
+        </button>
+      </ScreenHeader>
 
       <main className="mx-auto max-w-4xl px-5 py-6 sm:px-8">
         {loadError && (

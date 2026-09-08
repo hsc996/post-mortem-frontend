@@ -49,7 +49,7 @@ export function IncidentBulletin({ incident, now, canAct, onClaim, onSelect }: I
             </span>
             <span className="text-xs text-ink-dim">{incident.serviceName}</span>
           </div>
-          <StatusTag status={incident.status} />
+          <StatusTag status={incident.status} mitigation={incident.mitigation} now={now} />
         </div>
 
         <h2 className="font-title text-lg font-semibold text-ink sm:text-xl">{incident.title}</h2>

@@ -193,7 +193,7 @@ export function IncidentDetailPanel({
             <span className="text-xs text-ink-dim">{snapshot.serviceName}</span>
           </div>
           <div className="flex items-center gap-3">
-            <StatusTag status={snapshot.status} />
+            <StatusTag status={snapshot.status} mitigation={snapshot.mitigation} now={now} />
             <button
               ref={closeButtonRef}
               type="button"

@@ -12,7 +12,7 @@ export function MitigationReadout({ mitigation, now }: { mitigation: Mitigation;
     return (
       <div className="flex items-center gap-2 border border-alarm bg-alarm px-2.5 py-1.5">
         <span className="text-xs font-bold tracking-[0.08em] text-alarm-ink">
-          MITIGATION EXPIRED {clock.display} AGO — UNWIND REQUIRED
+          MITIGATION EXPIRED {clock.display} AGO. UNWIND REQUIRED.
         </span>
       </div>
     );

@@ -76,7 +76,7 @@ export function PastIncidentsScreen({
 
   return (
     <div className="min-h-screen bg-paper">
-      <ScreenHeader subtitle="PAST INCIDENTS — RESOLVED HISTORY">
+      <ScreenHeader subtitle="PAST INCIDENTS · RESOLVED HISTORY">
         <button
           type="button"
           onClick={onBack}

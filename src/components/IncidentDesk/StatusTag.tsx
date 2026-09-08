@@ -42,7 +42,7 @@ export function StatusTag({ status, mitigation, now }: StatusTagProps) {
       : false;
 
   const isLive = status !== "resolved";
-  const label = isExpiredMitigation ? "MITIGATED — EXPIRED" : LABEL[status];
+  const label = isExpiredMitigation ? "MITIGATED · EXPIRED" : LABEL[status];
   const colorClass = isExpiredMitigation ? "text-alarm" : COLOR[status];
   const dotColor = isExpiredMitigation ? "bg-alarm" : DOT[status];
 

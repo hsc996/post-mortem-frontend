@@ -32,13 +32,13 @@ export function PanelActionRow({
   pending,
 }: PanelActionRowProps) {
   if (incident.status === "resolved") {
-    return <p className="text-xs text-ink-dim">Resolved — no further action needed.</p>;
+    return <p className="text-xs text-ink-dim">Resolved. No further action needed.</p>;
   }
 
   if (!canAct) {
     return (
       <p className="border border-rule px-2.5 py-1.5 text-xs text-ink-dim">
-        VIEW ONLY — operation not permitted for current user role.
+        VIEW ONLY. Operation not permitted for current user role.
       </p>
     );
   }
@@ -67,7 +67,9 @@ export function PanelActionRow({
         <p className="border border-rule px-2.5 py-1.5 text-xs text-ink-dim">{blockedReason}</p>
       )}
       {successMessage && (
-        <p className="text-xs font-semibold tracking-[0.04em] text-ink">{successMessage}</p>
+        <p className="border border-nominal bg-nominal/10 px-2.5 py-1.5 text-xs font-semibold tracking-[0.04em] text-nominal">
+          {successMessage}
+        </p>
       )}
     </div>
   );

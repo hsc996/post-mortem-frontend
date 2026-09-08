@@ -105,7 +105,7 @@ export function AcceptInviteScreen({ token, onAccepted }: AcceptInviteScreenProp
           {preview.status === "ready" && (
             <>
               <motion.p variants={feedItemVariants} className="mb-6 text-center text-sm text-ink">
-                You've been invited as <span className="font-semibold">{preview.role.toUpperCase()}</span> —{" "}
+                You've been invited as <span className="font-semibold">{preview.role.toUpperCase()}</span> ·{" "}
                 {preview.email}
               </motion.p>
 

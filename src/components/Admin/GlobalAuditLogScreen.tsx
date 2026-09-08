@@ -19,7 +19,7 @@ export function GlobalAuditLogScreen({ token, onBack }: GlobalAuditLogScreenProp
 
   return (
     <div className="min-h-screen bg-paper">
-      <ScreenHeader subtitle="AUDIT LOG — SYSTEM-WIDE">
+      <ScreenHeader subtitle="AUDIT LOG · SYSTEM-WIDE">
         <button
           type="button"
           onClick={onBack}

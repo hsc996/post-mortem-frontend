@@ -38,7 +38,7 @@ export function AdminUsersScreen({ token, currentUserId, onBack }: AdminUsersScr
 
   return (
     <div className="min-h-screen bg-paper">
-      <ScreenHeader subtitle="USER DIRECTORY — ROLE MANAGEMENT">
+      <ScreenHeader subtitle="USER DIRECTORY · ROLE MANAGEMENT">
         <button
           type="button"
           onClick={() => setInvitePanelOpen(true)}

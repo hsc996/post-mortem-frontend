@@ -57,7 +57,7 @@ export function InviteUserPanel({ isOpen, onClose, onSend }: InviteUserPanelProp
         <motion.div variants={feedItemVariants} className="flex flex-col gap-4 px-5 py-4">
           <p className="text-sm text-ink">Invite created for {email}.</p>
           <p className="text-xs text-ink-dim">
-            Share this link with them directly — it also gets emailed if delivery is configured.
+            Share this link with them directly. It also gets emailed if delivery is configured.
           </p>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-semibold tracking-[0.1em] text-ink-dim">INVITE LINK</span>

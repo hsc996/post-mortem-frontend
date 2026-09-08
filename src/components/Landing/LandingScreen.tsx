@@ -22,7 +22,7 @@ interface Mechanism {
 const MECHANISMS: Mechanism[] = [
   {
     heading: "NOTHING IS EVER STALE.",
-    body: "A mitigation's expiry isn't pushed to you and cached — it's computed the instant you look, from when it was applied and how long it was meant to last. If it's expired, the wire says so the moment you open it, not whenever the last update happened to arrive.",
+    body: "A mitigation's expiry isn't pushed to you and cached. It's computed the instant you look, from when it was applied and how long it was meant to last. If it's expired, the wire says so the moment you open it, not whenever the last update happened to arrive.",
     image: readTimeTruth,
     width: 510,
     height: 430,
@@ -30,7 +30,7 @@ const MECHANISMS: Mechanism[] = [
   },
   {
     heading: "TWO RESPONDERS, ONE INCIDENT, ZERO SILENT OVERWRITES.",
-    body: "Every edit carries the version it was based on. If someone else moved first, your update is rejected outright with a real conflict to resolve — never a quiet overwrite of their work.",
+    body: "Every edit carries the version it was based on. If someone else moved first, your update is rejected outright with a real conflict to resolve, never a quiet overwrite of their work.",
     image: optimisticLocking,
     width: 510,
     height: 210,
@@ -38,7 +38,7 @@ const MECHANISMS: Mechanism[] = [
   },
   {
     heading: "EVERY ACTION PUNCHES A NEW LINE.",
-    body: "Claims, mitigations, resolutions, role changes — every mutation writes an append-only entry in the same transaction. The audit trail isn't a feature you maintain; it's infrastructure that's already there when you need it.",
+    body: "Claims, mitigations, resolutions, role changes: every mutation writes an append-only entry in the same transaction. The audit trail isn't a feature you maintain; it's infrastructure that's already there when you need it.",
     image: auditTrail,
     width: 510,
     height: 210,
@@ -89,7 +89,7 @@ export function LandingScreen({ onSignIn, onGetStarted }: LandingScreenProps) {
                 Incidents don't wait for a wiki page to load.
               </h1>
               <p className="max-w-[52ch] text-sm leading-relaxed text-ink-dim sm:text-base">
-                PostMortem is a real-time incident wire — a deterministic system of record built for the moment
+                PostMortem is a real-time incident wire: a deterministic system of record built for the moment
                 everything's on fire, not a doc pretending to be one.
               </p>
               <button

@@ -96,7 +96,7 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired, initialMode = 
           <button
             type="button"
             onClick={() => setMode("signin")}
-            className={`relative z-10 min-h-11 flex-1 text-xs font-semibold tracking-[0.1em] transition-colors ${
+            className={`relative z-10 min-h-11 flex-1 px-3 text-xs font-semibold tracking-[0.1em] transition-colors ${
               mode === "signin" ? "text-paper" : "text-ink-dim hover:text-ink"
             }`}
           >
@@ -105,7 +105,7 @@ export function LoginScreen({ onSignIn, onSignUp, sessionExpired, initialMode = 
           <button
             type="button"
             onClick={() => setMode("register")}
-            className={`relative z-10 min-h-11 flex-1 border-l border-rule text-xs font-semibold tracking-[0.1em] transition-colors ${
+            className={`relative z-10 min-h-11 flex-1 border-l border-rule px-3 text-xs font-semibold tracking-[0.1em] transition-colors ${
               mode === "register" ? "text-paper" : "text-ink-dim hover:text-ink"
             }`}
           >

@@ -137,6 +137,7 @@ Near-monochrome by design — every color decision defends the rule that a hue o
 
 ### Hierarchy
 - **Display** (800, 20px→24px, tight tracking, uppercase, Orbitron): the "POSTMORTEM" masthead nameplate. Appears once per top-level screen — the wire desk header, the login screen, and the admin directory header all repeat it identically.
+- **Kicker** (500, 11px, 0.2em tracking, uppercase, JetBrains Mono): the one-line subtitle directly beneath the masthead nameplate ("INCIDENT WIRE," "ACCEPT INVITE," a secondary screen's own identity). Deliberately wider-tracked and one weight lighter than Label — an editorial eyebrow under a bold nameplate, not a Label instance, and not a defect: its 11px sits at the low end of the Label range on purpose, reserved for exactly this one supporting role.
 - **Title** (600, 18px→20px, Chakra Petch): an incident's own title (bulletin row and detail panel), and the heading atop the incident detail panel or a create-flow modal ("FILE NEW INCIDENT", "INVITE USER"). The only other place Chakra Petch appears.
 - **Body** (400, 12px–14px, JetBrains Mono): reporter lines, elapsed-time strings, mitigation summaries, form help text — the day-to-day meta copy of the desk.
 - **Label** (600, 11px–12px, 0.1em tracking, uppercase, JetBrains Mono): status tags, precedence stamps, button and form-field labels, the role toggle, the "LIVE" indicator, and the "ALL CLEAR" / "WIRE DOWN" state headings.

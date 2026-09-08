@@ -45,7 +45,7 @@ export function PanelActionRow({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className={`flex flex-wrap items-center gap-x-2 gap-y-4 ${pending ? "opacity-50" : ""}`}>
+      <div className={`flex flex-wrap items-center gap-x-2 gap-y-8 ${pending ? "opacity-50" : ""}`}>
         <ClaimControl assigneeName={incident.assigneeName} onClaim={pending ? () => {} : onClaim} shortcutHint="C" />
         {incident.mitigation ? (
           <UnwindControl onUnwind={pending ? () => {} : onUnwind} />
